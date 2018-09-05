@@ -2,15 +2,16 @@ from datetime import datetime
 
 class Player(object):
     """ A player and set of identities on the servers """
-    def __init__(self, name):
+    def __init__(self, name, identities={}):
         self.name = name
         self.scoreUpdates = []
-        self.identities = {} # Key = gamename, val = nickname
+        self.identities = identities # Key = gamename, val = nickname
 
     def addIdentity(self, identity):
         """
         Add a identity to the Player
         :param identity: Identity dict
+        :type identity: dict
         """
         self.identities.update(identity)
 

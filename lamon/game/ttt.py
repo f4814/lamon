@@ -1,7 +1,7 @@
 from . import game
 from valve.source.a2s import ServerQuerier
 
-class TTT(game.Game):
+class ttt(game.Game):
     """ TTT (trouble in terrorist town) interface """
     def __init__(self, config):
         super().__init__(config)
