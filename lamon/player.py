@@ -1,6 +1,9 @@
+"""
+Player object
+"""
 from datetime import datetime
 
-class Player(object):
+class Player():
     """ A player and set of identities on the servers """
     def __init__(self, name, identities={}):
         self.name = name
@@ -25,7 +28,7 @@ class Player(object):
         :param gameNames: List of games to read the score from. None is all
         :returns: Int score
         """
-        if gameNames != None:
+        if gameNames is not None:
             relevant = filter(
                 (lambda x: True if x.gameName in gameNames else False),
                 gameNames)
@@ -47,7 +50,7 @@ class Player(object):
         update = ScoreUpdate(datetime.now(), gameName, points)
         self.scoreUpdates.append(update)
 
-class ScoreUpdate(object):
+class ScoreUpdate():
     """ A player gaining or loosing points """
     def __init__(self, time, gameName, points):
         self.time = time
