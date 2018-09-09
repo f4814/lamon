@@ -1,7 +1,9 @@
-from . import game
+from abc import abstractmethod
 from valve.source.a2s import ServerQuerier
 
-class source(game.Game):
+from lamon.game import Game
+
+class Source(Game):
     """ Generic interface to games using the source engine """
     @abstractmethod
     def __init__(self, config):

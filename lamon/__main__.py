@@ -1,13 +1,13 @@
 from time import sleep
 
-import core
+from .core import Core
 
 def printPlayers(p):
     for i in p:
         print(i.name + ' ' + str(i.getScore()))
 
 if __name__ == "__main__":
-    c = core.Core("config.yml")
+    c = Core("config.yml")
     print("initialized")
     while True:
         sleep(10)

@@ -1,6 +1,6 @@
-from game.source import source
+from .source import source
 
-class csgo(source):
+class CSGO(source):
     """ CS:GO game obejct """
     def __init__(self, config):
         self.name = "Counter Strike: Global Offensive"

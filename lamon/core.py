@@ -5,8 +5,8 @@ import importlib
 import multiprocessing
 import yaml
 
-from player import Player
-from context import Context
+from .player import Player
+from .context import Context
 
 class Core():
     """ Core object. Spawns threads. """
@@ -45,7 +45,7 @@ class Core():
             return
 
         # Import module
-        module = importlib.import_module('game.' + gameName)
+        module = importlib.import_module('lamon.game.' + gameName.lower())
         game_ = getattr(module, gameName)
         print('Loaded module: game.' + gameName)
 

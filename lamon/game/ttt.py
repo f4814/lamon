@@ -1,6 +1,6 @@
-from game.source import source
+from .source import Source
 
-class ttt(source):
+class TTT(Source):
     """ Trouble in terrorist town game object """
     def __init__(self, config):
         self.name = "Trouble in Terrorist Town"
