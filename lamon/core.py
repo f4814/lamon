@@ -5,8 +5,11 @@ import importlib
 import multiprocessing
 import yaml
 
+from gevent.pywsgi import WSGIServer
+
 from .player import Player
 from .context import Context
+from .app import App
 
 class Core():
     """ Core object. Spawns threads. """
@@ -15,6 +18,7 @@ class Core():
         print('Loading config file: ' + configFile)
         with open(configFile, 'r') as config:
             self.config = yaml.load(config)
+
         self.games = {}
 
         # Load players
@@ -25,6 +29,11 @@ class Core():
 
         # Create Context
         self.context = Context(players)
+
+        # Initialize flask server
+        if self.config['server'] == True:
+            self.app = App(self.config, self.context)
+        self.server = WSGIServer(('', 5000), self.app)
 
         # Load games
         for game in self.config['games']:

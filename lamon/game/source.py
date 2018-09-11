@@ -15,7 +15,7 @@ class Source(Game):
 
         # Is the correct game running?
         if self.querier.info()['game'] != self.name:
-            msg = 'Server (' + self.ip + ') is not running a TTT server'
+            msg = 'Server (' + self.ip + ') is not running the specified game'
             raise SourceError(msg)
 
     def getPlayerScores(self):
