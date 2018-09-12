@@ -1,5 +1,10 @@
 games:
-  TTT:
+  ttt:
+    delay: 10
+    ip: lexodexo.de
+    port: 27015
+
+  csgo:
     delay: 10
     ip: lexodexo.de
     port: 27015

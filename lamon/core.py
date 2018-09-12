@@ -54,21 +54,21 @@ class Core():
             return
 
         # Import module
-        module = importlib.import_module('lamon.game.' + gameName.lower())
-        game_ = getattr(module, gameName)
+        module = importlib.import_module('lamon.game.' + gameName)
+        game_ = getattr(module, gameName.upper())
         print('Loaded module: game.' + gameName)
 
         # Create game Object
         game = game_(self.config['games'][gameName])
 
         # Add Flask route
-        print("Adding route for: /game/" + gameName.lower())
+        print("Adding route for: /game/" + gameName)
         if game.hasTemplate:
-            self.app.add_url_rule('/game/' + gameName.lower(), gameName.lower(),
-                                   gameRoute(gameName.lower()))
+            self.app.add_url_rule('/game/' + gameName, gameName,
+                                   gameRoute(gameName))
         else:
-            self.app.add_url_rule('/game/' + gameName.lower(), gameName.lower(),
-                                   defaultRoute(gameName.lower()))
+            self.app.add_url_rule('/game/' + gameName, gameName,
+                                   defaultRoute(gameName))
 
         # Dispatch
         p = multiprocessing.Process(target=game.dispatch,
