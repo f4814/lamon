@@ -18,3 +18,9 @@ class App(Flask):
 
 def index():
     return 'in development'
+
+def gameRoute(gameName):
+    return (lambda: render_template('tepmlates/' + gameName, gameName))
+
+def defaultRoute(gameName):
+    return (lambda: 'testing')

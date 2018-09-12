@@ -9,7 +9,7 @@ from gevent.pywsgi import WSGIServer
 
 from .player import Player
 from .context import Context
-from .app import App
+from .app import App, gameRoute, defaultRoute
 
 class Core():
     """ Core object. Spawns threads. """
@@ -60,6 +60,15 @@ class Core():
 
         # Create game Object
         game = game_(self.config['games'][gameName])
+
+        # Add Flask route
+        print("Adding route for: /game/" + gameName.lower())
+        if game.hasTemplate:
+            self.app.add_url_rule('/game/' + gameName.lower(), gameName.lower(),
+                                   gameRoute(gameName.lower()))
+        else:
+            self.app.add_url_rule('/game/' + gameName.lower(), gameName.lower(),
+                                   defaultRoute(gameName.lower()))
 
         # Dispatch
         p = multiprocessing.Process(target=game.dispatch,

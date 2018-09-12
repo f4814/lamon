@@ -14,7 +14,7 @@ class Source(Game):
         self.querier = ServerQuerier((self.ip, self.port))
 
         # Is the correct game running?
-        if self.querier.info()['game'] != self.name:
+        if self.querier.info()['game'] != self.internalName:
             msg = 'Server (' + self.ip + ') is not running the specified game'
             raise SourceError(msg)
 

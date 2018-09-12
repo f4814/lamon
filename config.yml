@@ -1,0 +1,15 @@
+games:
+  TTT:
+    delay: 10
+    ip: lexodexo.de
+    port: 27015
+
+players:
+  fabian:
+    nicks:
+      ttt: d4rkshad0w
+  lukas:
+    nicks:
+      ttt: Meinzzz
+
+server: true

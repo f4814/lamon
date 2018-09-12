@@ -2,7 +2,16 @@ from abc import ABC, abstractmethod
 from time import sleep
 
 class Game(ABC):
-    """ Abstract Game interface """
+    """
+    Abstract Game interface
+    :member ip: server ip
+    :memper port: server port
+    :member delay: time to wait between polls
+    :member name: name of the game
+    :member scores: old scores
+    :member config: server config
+    :member hasTemplate: Does the game provide a template? Default: False
+    """
     def __init__(self, config):
         self.ip = config['ip']
         self.port = config['port']
@@ -10,6 +19,7 @@ class Game(ABC):
         self.name = ""
         self.scores = {}
         self.config = config
+        self.hasTemplate = False
 
         super().__init__()
 
