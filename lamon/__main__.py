@@ -16,5 +16,3 @@ if __name__ == "__main__":
     print("initialized")
     while True:
         sleep(10)
-        with c.context.lock:
-            printPlayers(c.context.players)

@@ -4,12 +4,13 @@ Contains the Core object. This is the only module you need to import
 import importlib
 import multiprocessing
 import yaml
+import sqlite3
 
 from gevent.pywsgi import WSGIServer
 
-from .player import Player
-from .context import Context
+from .player import Players
 from .app import App, gameRoute, defaultRoute
+from .sql import initDatabase
 
 class Core():
     """ Core object. Spawns threads. """
@@ -21,18 +22,19 @@ class Core():
 
         self.games = {}
 
-        # Load players
-        players = []
-        for key, value in self.config['players'].items():
-            player = Player(key, value['nicks'])
-            players.append(player)
+        # Create Squlite database
+        self.sqlConn = sqlite3.connect(self.config['database']['path'])
+        initDatabase(self.sqlConn.cursor())
 
-        # Create Context
-        self.context = Context(players)
+        # Load players
+        self.players = Players(self.sqlConn)
+        for key, value in self.config['players'].items():
+            self.players.addPlayer(key, value['nicks'])
 
         # Initialize flask server
         if self.config['server'] == True:
-            self.app = App(self.config, self.context)
+            appCursor = self.sqlConn.cursor()
+            self.app = App(self.config, appCursor)
         self.server = WSGIServer(('', 5000), self.app)
 
         # Load games
@@ -59,7 +61,7 @@ class Core():
         print('Loaded module: game.' + gameName)
 
         # Create game Object
-        game = game_(self.config['games'][gameName])
+        game = game_(self.players, self.config['games'][gameName])
 
         # Add Flask route
         print("Adding route for: /game/" + gameName)
@@ -72,8 +74,7 @@ class Core():
 
         # Dispatch
         p = multiprocessing.Process(target=game.dispatch,
-                                    name=gameName + '_watcher',
-                                    args=(self.context,))
+                                    name=gameName + '_watcher')
         self.games[gameName] = (game, p)
         p.start()
         print('Watching game ' + gameName)
@@ -86,3 +87,4 @@ class Core():
             print('Terminating ' + game.name + ' game watcher')
             p.terminate() # TODO use queue
             game.close()
+        self.sqlConn.close()

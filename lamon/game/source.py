@@ -6,8 +6,8 @@ from lamon.game import Game
 class Source(Game):
     """ Generic interface to games using the source engine """
     @abstractmethod
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, players, config):
+        super().__init__(players, config)
 
     def connect(self):
         """ Initialize ServerQuerier """

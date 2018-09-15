@@ -11,8 +11,9 @@ class Game(ABC):
     :member scores: old scores
     :member config: server config
     :member hasTemplate: Does the game provide a template? Default: False
+    :mameber players: Global players object
     """
-    def __init__(self, config):
+    def __init__(self, players, config):
         self.ip = config['ip']
         self.port = config['port']
         self.delay = config['delay']
@@ -20,6 +21,7 @@ class Game(ABC):
         self.scores = {}
         self.config = config
         self.hasTemplate = False
+        self.players = players
 
         super().__init__()
 
@@ -37,29 +39,19 @@ class Game(ABC):
         """
         pass
 
-    def updatePlayerScores(self, players):
+    def updatePlayerScores(self):
         """
         Update scores of the players
-        :param players: List of Player objects to update
         """
         oldScores = self.scores
         newScores = self.getPlayerScores()
 
-        for p in players:
-            nick = p.getName(self.name)
+        for player, score in oldScores.items():
+            if newScores.get(player, score) != score:
+                points = newScores[player] - score
+                self.players[player].addScore(points, self.name)
 
-            if not nick in newScores: # Player not in game
-                continue
-            # TODO Better round restart detection
-            elif newScores[nick] == 0 and oldScores.get(nick, 0) != 0:
-                continue
-
-            gained = newScores.get(nick) - oldScores.get(nick, 0)
-
-            if gained != 0:
-                p.addScore(gained, self.name)
-
-    def dispatch(self, context):
+    def dispatch(self):
         """
         Keep the game object and player object as up-to-date as possible. This
         is started in a new thread by the core. Overwrite to add exception
@@ -67,14 +59,10 @@ class Game(ABC):
 
         If the game provides some sort of streaming API, this can be
         overwritten.
-        :param context: Global context object
-        :type context: Context
         """
         self.connect()
         while True:
-            with context.lock:
-                self.updatePlayerScores(context.players)
-
+            self.updatePlayerScores()
             sleep(self.delay)
         self.close()
 

@@ -4,11 +4,6 @@ games:
     ip: lexodexo.de
     port: 27015
 
-  csgo:
-    delay: 10
-    ip: lexodexo.de
-    port: 27015
-
 players:
   fabian:
     nicks:
@@ -18,3 +13,6 @@ players:
       ttt: Meinzzz
 
 server: true
+
+database:
+  path: ":memory:"
