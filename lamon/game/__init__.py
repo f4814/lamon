@@ -49,7 +49,7 @@ class Game(ABC):
         for player, score in oldScores.items():
             if newScores.get(player, score) != score:
                 points = newScores[player] - score
-                self.players[player].addScore(points, self.name)
+                self.players[player].addScore(points, self.name) # TODO Error
 
     def dispatch(self):
         """

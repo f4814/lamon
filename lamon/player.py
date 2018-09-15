@@ -13,15 +13,15 @@ class Player():
     """
     def __init__(self, name, cursor, identities=None):
         self.name = name
-        self.cursor = cursor
+        self._cursor = cursor
 
         # Add player to database if not already existent
         query = "SELECT * FROM player WHERE name=?"
         add = "INSERT INTO player VALUES(?)"
 
-        if not cursor.execute(query, (name,)).fetchone():
-            cursor.execute(add, (name,))
-            cursor.connection.commit()
+        if not _cursor.execute(query, (name,)).fetchone():
+            _cursor.execute(add, (name,))
+            _cursor.connection.commit()
 
         # Add identities
         if identities:

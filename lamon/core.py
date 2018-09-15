@@ -18,36 +18,35 @@ class Core():
         # Load config
         print('Loading config file: ' + configFile)
         with open(configFile, 'r') as config:
-            self.config = yaml.load(config)
+            self._config = yaml.load(config)
 
         self.games = {}
 
         # Create Squlite database
-        self.sqlConn = sqlite3.connect(self.config['database']['path'])
-        initDatabase(self.sqlConn.cursor())
+        self._sqlConn = sqlite3.connect(self._config['database']['path'])
+        initDatabase(self._sqlConn.cursor())
 
         # Load players
-        self.players = Players(self.sqlConn)
-        for key, value in self.config['players'].items():
+        self.players = Players(self._sqlConn)
+        for key, value in self._config['players'].items():
             self.players.addPlayer(key, value['nicks'])
 
         # Initialize flask server
-        if self.config['server'] == True:
-            appCursor = self.sqlConn.cursor()
-            self.app = App(self.config, appCursor)
-        self.server = WSGIServer(('', 5000), self.app)
+        if self._config['server'] == True:
+            self._app = App(self._config)
+        self.server = WSGIServer(('', 5000), self._app)
 
         # Load games
-        for game in self.config['games']:
-            self.loadGame(game)
+        for game in self._config['games']:
+            self._loadGame(game)
 
-    def loadGame(self, gameName):
+    def _loadGame(self, gameName):
         """
         Load the game specified by config.
         :param config: Game config read from yaml
         :type config: dict
         """
-        if not gameName in self.config['games']:
+        if not gameName in self._config['games']:
             print('Game ' + gameName + ' not configured. Skipping.')
             return
 
@@ -61,15 +60,15 @@ class Core():
         print('Loaded module: game.' + gameName)
 
         # Create game Object
-        game = game_(self.players, self.config['games'][gameName])
+        game = game_(self.players, self._config['games'][gameName])
 
         # Add Flask route
         print("Adding route for: /game/" + gameName)
         if game.hasTemplate:
-            self.app.add_url_rule('/game/' + gameName, gameName,
+            self._app.add_url_rule('/game/' + gameName, gameName,
                                    gameRoute(gameName))
         else:
-            self.app.add_url_rule('/game/' + gameName, gameName,
+            self._app.add_url_rule('/game/' + gameName, gameName,
                                    defaultRoute(gameName))
 
         # Dispatch
@@ -87,4 +86,4 @@ class Core():
             print('Terminating ' + game.name + ' game watcher')
             p.terminate() # TODO use queue
             game.close()
-        self.sqlConn.close()
+        self._sqlConn.close()

@@ -7,9 +7,8 @@ class App(Flask):
     """
     Add default rules to Flask, so Core only has to manage watcher routes
     """
-    def __init__(self, config, sqlCursor):
-        self.config = config
-        self.sqlCursor = sqlCursor
+    def __init__(self, config):
+        self._config = config
         super().__init__('lamon')
 
         # Add default rules
