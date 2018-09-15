@@ -11,7 +11,17 @@ class Player():
     Player objects are created by the Players object and should only be used
     for one task.
     """
-    def __init__(self, name, cursor, identities=None):
+    def __init__(self, name, cursor, identities=None, create=True):
+        """
+        :param name: Player name
+        :type name: String
+        :type cursor: Cursor
+        :param identities: Identities to add to the Player
+        :type identites: Dict
+        :param create: Create user if not existent
+        :type create: Bool
+        :raises: PlayerNameError
+        """
         self.name = name
         self._cursor = cursor
 
@@ -19,9 +29,14 @@ class Player():
         query = "SELECT * FROM player WHERE name=?"
         add = "INSERT INTO player VALUES(?)"
 
-        if not _cursor.execute(query, (name,)).fetchone():
-            _cursor.execute(add, (name,))
-            _cursor.connection.commit()
+        if not cursor.execute(query, (name,)).fetchone():
+            if create:
+                cursor.execute(add, (name,))
+                cursor.connection.commit()
+            else:
+                raise PlayerNameError('Player ' + name + ' does not exist')
+        elif create:
+            raise PlayerNameError('Player ' + name + ' already exists')
 
         # Add identities
         if identities:
@@ -33,19 +48,18 @@ class Player():
         :param identity: Identity dict
         :type identity: dict
         """
-        print(identity)
         add = "INSERT INTO identity VALUES (?,?,?)"
         for game, nick in identity.items():
-            self.cursor.execute(add, (game, nick, self.name))
-        self.cursor.connection.commit()
+            self._cursor.execute(add, (game, nick, self.name))
+        self._cursor.connection.commit()
 
     def getName(self, gameName):
         """ Find the nickname in game """
-        query = """"
-            SELECT gameName FROM identity WHERE gameName='?' AND playerName='?'
+        query = """
+            SELECT nick FROM identity WHERE gameName=? AND playerName=?
             """
-        self.cursor.execute(query, gameName, self.name)
-        return self.cursor.fetchone()
+        self._cursor.execute(query, (gameName, self.name))
+        return self._cursor.fetchone()[0]
 
     def getScore(self, gameNames=None):
         """
@@ -54,18 +68,18 @@ class Player():
         :returns: Int score
         """
         score = 0
-        querySimple = "SELECT points FROM scoreUpdates WHERE playerName='?'"
+        querySimple = "SELECT points FROM scoreUpdate WHERE playerName=?"
         queryMany = """
             SELECT points FROM scoreUpdates
-                WHERE gameName REGEXP '?'
-                AND playerName='?'
+                WHERE gameName REGEXP ?
+                AND playerName=?
             """
 
         if gameNames:
-            scores = self.cursor.execute(queryMany, '|'.join(gameNames),
+            scores = self._cursor.execute(queryMany, '|'.join(gameNames),
                                          self.name)
         else:
-            scores = self.cursor.execute(querySimple, self.name)
+            scores = self._cursor.execute(querySimple, (self.name,))
 
         for s in scores:
             score += s
@@ -79,16 +93,17 @@ class Player():
         :param gameName: Name of the game
         """
         query = "INSERT INTO scoreUpdate (?, ?, ?, ?)"
-        self.cursor.execute(query, points, str(datetime.now()),
+        self._cursor.execute(query, points, str(datetime.now()),
                             gameName, self.name)
-        self.cursor.connection.commit()
+        self._cursor.connection.commit()
+
 
 class Players():
     """
     Object of all players with indexing abilites
     """
-    def __init__(self, connection):
-        self.connection = connection
+    def __init__(self, sqlConn):
+        self._sqlConn = sqlConn
 
     def addPlayer(self, name, identities=None):
         """
@@ -98,9 +113,14 @@ class Players():
         :type name: String
         :param identities: Identities of the new Player
         :type identities: dict
+        :raises: PlayerNameError
         """
-        cursor = self.connection.cursor()
-        Player(name, cursor, identities)
+        cursor = self._sqlConn.cursor()
+        Player(name, cursor, identities, create=True)
+
+    def getPlayer(self, name):
+        """ Name for __getitem__"""
+        return self[name]
 
     def __getitem__(self, key):
         """
@@ -108,8 +128,11 @@ class Players():
         :param key: Player name
         :type key: String
         :rtype: Player
+        :raises: PlayerNameError
         """
-        cursor = self.conection.cursor()
-        p = Player(key, cursor)
+        cursor = self._sqlConn.cursor()
+        p = Player(key, cursor, create=False)
         return p
 
+class PlayerNameError(Exception):
+    pass

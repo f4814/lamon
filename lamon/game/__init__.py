@@ -54,19 +54,37 @@ class Game(ABC):
     def dispatch(self):
         """
         Keep the game object and player object as up-to-date as possible. This
-        is started in a new thread by the core. Overwrite to add exception
-        handling.
+        is started in a new thread by the core. Exceptions are ignored.
 
         If the game provides some sort of streaming API, this can be
         overwritten.
         """
-        self.connect()
+        try:
+            self.connect()
+        except GameConnectionError:
+            pass
+
         while True:
-            self.updatePlayerScores()
+            try:
+                self.updatePlayerScores()
+            except GameConnectionError:
+                pass
             sleep(self.delay)
+
         self.close()
 
     @abstractmethod
     def close(self):
         """ Close the connection to the API """
         pass
+
+
+class GameError(Exception):
+    def __init__(self, game, address, message):
+        super().__init__('[' + game + '] ' + str(address) + ' ' + message)
+
+class GameTypeError(GameError):
+    pass
+
+class GameConnectionError(GameError):
+    pass

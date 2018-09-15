@@ -14,5 +14,6 @@ if __name__ == "__main__":
                                      args=(('', 5000),))
     server.start()
     print("initialized")
-    while True:
-        sleep(10)
+    try:
+        while True:
+            sleep(10)
