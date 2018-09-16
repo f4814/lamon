@@ -1,5 +1,9 @@
+import logging
+
 from abc import ABC, abstractmethod
 from time import sleep
+
+logger = logging.getLogger(__name__)
 
 class Game(ABC):
     """
@@ -67,8 +71,8 @@ class Game(ABC):
         while True:
             try:
                 self.updatePlayerScores()
-            except GameConnectionError:
-                pass
+            except GameConnectionError as e:
+                logger.error(str(e))
             sleep(self.delay)
 
         self.close()

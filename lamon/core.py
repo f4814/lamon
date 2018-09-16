@@ -5,6 +5,7 @@ import importlib
 import multiprocessing
 import yaml
 import sqlite3
+import logging
 
 from gevent.pywsgi import WSGIServer
 
@@ -12,11 +13,13 @@ from .player import Players
 from .app import App, gameRoute, defaultRoute
 from .sql import initDatabase
 
+logger = logging.getLogger(__name__)
+
 class Core():
     """ Core object. Spawns threads. """
     def __init__(self, configFile):
         # Load config
-        print('Loading config file: ' + configFile)
+        logger.info('Loading config file: ' + configFile)
         with open(configFile, 'r') as config:
             self._config = yaml.load(config)
 
@@ -47,23 +50,23 @@ class Core():
         :type config: dict
         """
         if not gameName in self._config['games']:
-            print('Game ' + gameName + ' not configured. Skipping.')
+            logger.warning('Game ' + gameName + ' not configured. Skipping.')
             return
 
         if gameName in self.games:
-            print('Game ' + gameName + ' already running. Skipping.')
+            logger.warning('Game ' + gameName + ' already running. Skipping.')
             return
 
         # Import module
         module = importlib.import_module('lamon.game.' + gameName)
         game_ = getattr(module, gameName.upper())
-        print('Loaded module: game.' + gameName)
+        logger.info('Loaded module: game.' + gameName)
 
         # Create game Object
         game = game_(self.players, self._config['games'][gameName])
 
         # Add Flask route
-        print("Adding route for: /game/" + gameName)
+        logger.info("Adding route for: /game/" + gameName)
         if game.hasTemplate:
             self._app.add_url_rule('/game/' + gameName, gameName,
                                    gameRoute(gameName))
@@ -76,14 +79,14 @@ class Core():
                                     name=gameName + '_watcher')
         self.games[gameName] = (game, p)
         p.start()
-        print('Watching game ' + gameName)
+        logger.info('Watching game ' + gameName)
 
     def close(self):
         """
         Stop all threads and close all connections
         """
         for game, p in self.games:
-            print('Terminating ' + game.name + ' game watcher')
+            logger.info('Terminating ' + game.name + ' game watcher')
             p.terminate() # TODO use queue
             game.close()
         self._sqlConn.close()

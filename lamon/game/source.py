@@ -1,7 +1,11 @@
+import logging
+
 from abc import abstractmethod
 from valve.source.a2s import ServerQuerier, NoResponseError
 
-from lamon.game import Game, GameConnectionError, GameTypeError
+from . import Game, GameConnectionError, GameTypeError
+
+logger = logging.getLogger(__name__)
 
 class Source(Game):
     """ Generic interface to games using the source engine """
@@ -22,6 +26,9 @@ class Source(Game):
             raise GameConnectionError(self.name, (self.ip, self.port),
                                      'Cannot connect to server')
 
+        logger.info('Connected to ' + self.name + 'server on ' +
+                    str((self.ip, self.port)), '.')
+
     def getPlayerScores(self):
         self.scores = {}
 
@@ -33,9 +40,12 @@ class Source(Game):
 
         for p in players:
             self.scores[p['name']] = p['score']
+            logger.debug(self.scores)
 
         return self.scores
 
     def close(self):
         """ Close ServerQuerier """
+        logger.info('Closing connection to ' + self.name + 'server on ' +
+                    str((self.ip, self.port)))
         self.querier.close()
