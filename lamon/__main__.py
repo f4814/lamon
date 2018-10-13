@@ -11,6 +11,7 @@ if __name__ == "__main__":
     server = multiprocessing.Process(target=c.server.serve_forever,
                                      name='server',
                                      args=(('', 5000),))
+    logger.info("Starting flask server")
     server.start()
     logger.info("Initialized")
     try:

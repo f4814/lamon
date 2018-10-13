@@ -30,7 +30,7 @@ class Source(Game):
                     str((self.ip, self.port)), '.')
 
     def getPlayerScores(self):
-        self.scores = {}
+        self._scores = {}
 
         try:
             players = self.querier.players()['players']
@@ -39,10 +39,10 @@ class Source(Game):
                                      'Cannot connect to server')
 
         for p in players:
-            self.scores[p['name']] = p['score']
+            self._scores[p['name']] = p['score']
             logger.debug(self.scores)
 
-        return self.scores
+        return self._scores
 
     def close(self):
         """ Close ServerQuerier """

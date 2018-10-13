@@ -10,7 +10,7 @@ import logging
 from gevent.pywsgi import WSGIServer
 
 from .player import Players
-from .app import App, gameRoute, defaultRoute
+from .app import App
 from .sql import initDatabase
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class Core():
 
         self.games = {}
 
-        # Create Squlite database
+        # Create Sqlite database
         self._sqlConn = sqlite3.connect(self._config['database']['path'])
         initDatabase(self._sqlConn.cursor())
 
@@ -66,13 +66,8 @@ class Core():
         game = game_(self.players, self._config['games'][gameName])
 
         # Add Flask route
-        logger.info("Adding route for: /game/" + gameName)
-        if game.hasTemplate:
-            self._app.add_url_rule('/game/' + gameName, gameName,
-                                   gameRoute(gameName))
-        else:
-            self._app.add_url_rule('/game/' + gameName, gameName,
-                                   defaultRoute(gameName))
+        self._app.add_game_rule(gameName, self._config['games'][gameName],
+                                game.hasTemplate)
 
         # Dispatch
         p = multiprocessing.Process(target=game.dispatch,

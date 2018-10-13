@@ -2,3 +2,5 @@ python-valve
 pyyaml
 Flask
 gevent
+Flask-Assets
+pyScss

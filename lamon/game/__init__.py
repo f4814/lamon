@@ -22,8 +22,8 @@ class Game(ABC):
         self.port = config['port']
         self.delay = config['delay']
         self.name = ""
-        self.scores = {}
-        self.config = config
+        self._scores = {}
+        self._config = config
         self.hasTemplate = False
         self.players = players
 
@@ -37,7 +37,7 @@ class Game(ABC):
     @abstractmethod
     def getPlayerScores(self):
         """
-        Get player scores from the server into self.scores
+        Get player scores from the server into self._scores
         :returns: New Scores
         :rtype: Player->Score dict
         """
@@ -47,7 +47,7 @@ class Game(ABC):
         """
         Update scores of the players
         """
-        oldScores = self.scores
+        oldScores = self._scores
         newScores = self.getPlayerScores()
 
         for player, score in oldScores.items():

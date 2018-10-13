@@ -1,0 +1,48 @@
+<html>
+    <head>
+        {% block head %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {% assets "scss_all" %}
+        <link rel="stylesheet" type="text/css" href="/css/default.css">
+        {% endassets %}
+
+        <title>{% block title %}{% endblock %} - Lamon </title>
+        {% endblock %}
+    </head>
+
+    <body>
+        <nav>
+            <a class="{% block nav_home %}{% endblock %}"
+                href="/">Home</a>
+
+            <a class="{% block nav_players %}{% endblock %} dropbtn"
+                href="/players">Players</a>
+
+            <div class="dropdown">
+                <a class="{% block nav_games %}{% endblock %}"
+                    href="/games">Games</a>
+                <div class="dropdown-content">
+                    {% for game in games %}
+                        <a href="{{ game[1] }}">{{ game[0] }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <a class="{% block nav_info %}{% endblock %}"
+               href="/info">Info</a>
+
+            <a class="{% block nav_profile %}{% endblock %}"
+               style="float:right" href="/profile">Profile</a>
+        </nav>
+
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+        <footer>
+            {% block footer %}
+            Lamon
+            {% endblock %}
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,88 @@
+$bg-color: #FFFFFF;
+
+// Default navbar color
+$menu-color: #FFFFFF;
+$menu-bg-color: #00FF00;
+
+// Color of current page
+$menu-active-color: #FFFFFF;
+$menu-active-bg-color: #FF0000;
+
+// Color of hovered page
+$menu-hover-color: #FFFFFF;
+$menu-hover-bg-color: #0000FF;
+
+// Color of dropdown elements
+$menu-dropdown-color: #FFFFFF;
+$menu-dropdown-bg-color: #00FFFF;
+
+// Color of hovered dropdown elements
+$menu-dropdown-hover-color: #FFFFFF;
+$menu-dropdown-hover-bg-color: #0000FF;
+
+
+body {
+    background-color: $bg-color;
+    margin: 0;
+}
+
+nav {
+    color: $menu-color;
+    background-color: $menu-bg-color;
+    overflow: hidden;
+
+    .dropdown {
+        position: relative;
+        display: block;
+    }
+
+    .dropdown-content {
+        display: none;
+        // position: absolute;
+        text-align: left;
+        min-width: 100%;
+        z-index: 1;
+
+        a {
+            color: $menu-dropdown-color;
+            background-color: $menu-dropdown-bg-color;
+            display: block;
+        }
+
+        a:hover {
+            color: $menu-dropdown-hover-color;
+            background-color: $menu-dropdown-hover-bg-color;
+        }
+    }
+
+    a {
+        cursor: pointer;
+        display: inline-block;
+        float: left;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+    }
+
+
+    .dropdown:hover .dropdown-content {
+        display:block;
+    }
+
+    a:hover {
+        color: $menu-hover-color;
+        background-color: $menu-hover-bg-color;
+    }
+
+    a.active {
+        color: $menu-active-color;
+        background-color: $menu-active-bg-color;
+    }
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+}
+

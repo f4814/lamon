@@ -4,6 +4,9 @@ Convenience options for interacting with the database
 import sqlite3
 
 def initDatabase(cursor):
+    """
+    Create all Tables if they don't exist
+    """
     query = """
         SELECT name FROM sqlite_master WHERE type='table'
         """
