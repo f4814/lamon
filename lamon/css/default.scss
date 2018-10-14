@@ -34,24 +34,29 @@ nav {
     .dropdown {
         position: relative;
         display: block;
+
+        &:hover .dropdown-content {
+            display: block;
+        }
     }
 
     .dropdown-content {
         display: none;
-        // position: absolute;
+        position: absolute;
         text-align: left;
         min-width: 100%;
         z-index: 1;
 
         a {
+            display: block;
+
             color: $menu-dropdown-color;
             background-color: $menu-dropdown-bg-color;
-            display: block;
-        }
 
-        a:hover {
-            color: $menu-dropdown-hover-color;
-            background-color: $menu-dropdown-hover-bg-color;
+            &:hover {
+                color: $menu-dropdown-hover-color;
+                background-color: $menu-dropdown-hover-bg-color;
+            }
         }
     }
 
@@ -62,21 +67,16 @@ nav {
         text-align: center;
         padding: 14px 16px;
         text-decoration: none;
-    }
 
+        &:hover {
+            color: $menu-hover-color;
+            background-color: $menu-hover-bg-color;
+        }
 
-    .dropdown:hover .dropdown-content {
-        display:block;
-    }
-
-    a:hover {
-        color: $menu-hover-color;
-        background-color: $menu-hover-bg-color;
-    }
-
-    a.active {
-        color: $menu-active-color;
-        background-color: $menu-active-bg-color;
+        &.active {
+            color: $menu-active-color;
+            background-color: $menu-active-bg-color;
+        }
     }
 }
 
