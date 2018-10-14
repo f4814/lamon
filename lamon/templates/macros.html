@@ -1,0 +1,8 @@
+{% macro active(page) %}
+    {% if page == request.endpoint %} active {% endif %}
+{% endmacro %}
+
+{% macro active_subsite(page) %}
+    {% if page in request.endpoint %} active {% endif %}
+{% endmacro %}
+

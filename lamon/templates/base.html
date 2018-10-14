@@ -1,3 +1,4 @@
+{% from 'macros.html' import active, active_subsite %}
 <html>
     <head>
         {% block head %}
@@ -13,32 +14,35 @@
 
     <body>
         <nav>
-            <a class="{% block nav_home %}{% endblock %}"
+            <a class="{{active('index')}} toplevel"
                 href="/">Home</a>
 
-            <a class="{% block nav_players %}{% endblock %} dropbtn"
+            <a class="{{active('players')}} toplevel"
                 href="/players">Players</a>
 
             <div class="dropdown">
-                <a class="{% block nav_games %}{% endblock %}"
-                    href="/games">Games</a>
+                <div class="dropbtn {{active_subsite('game')}}">
+                    <a href="/games">Games</a>
+                </div>
                 <div class="dropdown-content">
                     {% for game in games %}
-                        <a href="{{ game[1] }}">{{ game[0] }}</a>
+                        <a class="{{active(game[1])}}"
+                                href="{{ game[2] }}">{{ game[0] }}</a>
                     {% endfor %}
                 </div>
             </div>
 
-            <a class="{% block nav_info %}{% endblock %}"
+            <a class="{{active('info')}} toplevel"
                href="/info">Info</a>
 
-            <a class="{% block nav_profile %}{% endblock %}"
+            <a class="{{active('profile')}} toplevel"
                style="float:right" href="/profile">Profile</a>
         </nav>
 
         <div id="content">
             {% block content %}{% endblock %}
         </div>
+
         <footer>
             {% block footer %}
             Lamon

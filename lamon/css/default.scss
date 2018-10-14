@@ -1,82 +1,96 @@
-$bg-color: #FFFFFF;
+$bg: #FFFFFF;
 
 // Default navbar color
-$menu-color: #FFFFFF;
-$menu-bg-color: #00FF00;
+$menu: #FFFFFF;
+$menu-bg: #00FF00;
 
 // Color of current page
-$menu-active-color: #FFFFFF;
-$menu-active-bg-color: #FF0000;
+$menu-active: #FFFFFF;
+$menu-active-bg: #FF0000;
 
 // Color of hovered page
-$menu-hover-color: #FFFFFF;
-$menu-hover-bg-color: #0000FF;
+$menu-hover: #FFFFFF;
+$menu-hover-bg: #0000FF;
 
 // Color of dropdown elements
-$menu-dropdown-color: #FFFFFF;
-$menu-dropdown-bg-color: #00FFFF;
+$menu-drop: #FFFFFF;
+$menu-drop-bg: #00FFFF;
 
 // Color of hovered dropdown elements
-$menu-dropdown-hover-color: #FFFFFF;
-$menu-dropdown-hover-bg-color: #0000FF;
+$menu-drop-hover: #FFFFFF;
+$menu-drop-hover-bg: #0000FF;
 
+// Color of active dropdown elements
+$menu-drop-active: #FFFFFF;
+$menu-drop-active-bg: #FF0000;
+
+@mixin color($fg, $bg) {
+    color: $fg;
+    background: $bg;
+}
 
 body {
-    background-color: $bg-color;
+    background: $bg;
     margin: 0;
 }
 
 nav {
-    color: $menu-color;
-    background-color: $menu-bg-color;
+    @include color($menu, $menu-bg);
     overflow: hidden;
 
-    .dropdown {
-        position: relative;
-        display: block;
+    // Non-Dropdown items
+    .toplevel {
+        float: left;
+        padding: 14px 16px;
 
-        &:hover .dropdown-content {
-            display: block;
-        }
+        &:hover { @include color($menu-hover, $menu-hover-bg) }
+        &.active { @include color($menu-active, $menu-active-bg) }
     }
 
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        text-align: left;
-        min-width: 100%;
-        z-index: 1;
+    // Dropdown Items
+    .dropdown {
+        float: left;
+        overflow: hidden;
 
-        a {
-            display: block;
+        &:hover {
+            @include color($menu-hover, $menu-hover-bg);
+            .dropdown-content { display: block; }
+        }
 
-            color: $menu-dropdown-color;
-            background-color: $menu-dropdown-bg-color;
+        // Top-level Item
+        .dropbtn {
+            padding: 14px 16px;
 
-            &:hover {
-                color: $menu-dropdown-hover-color;
-                background-color: $menu-dropdown-hover-bg-color;
+            &:hover { @include color($menu-hover, $menu-hover-bg) }
+            &.active { @include color($menu-active, $menu-active-bg) }
+        }
+
+        // Dropdown items
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+
+            @include color($menu-drop, $menu-drop-bg);
+
+            a {
+                float: none;
+                padding: 12px 16px;
+                display: block;
+                text-align: left;
+
+                &:hover { @include color($menu-drop-hover, $menu-drop-hover-bg) }
+                &.active { @include color($menu-drop-active, $menu-drop-active-bg) }
             }
         }
     }
 
+    // Default link style
     a {
-        cursor: pointer;
-        display: inline-block;
-        float: left;
-        text-align: center;
-        padding: 14px 16px;
         text-decoration: none;
-
-        &:hover {
-            color: $menu-hover-color;
-            background-color: $menu-hover-bg-color;
-        }
-
-        &.active {
-            color: $menu-active-color;
-            background-color: $menu-active-bg-color;
-        }
+        @include color(inherit, inherit);
     }
 }
 

@@ -37,8 +37,9 @@ class App(Flask):
         :param hasTemplate: Is there a special template for this game
         :type hasTemplate: bool
         """
-        uri = '/game/' + gameName
-        self._games.append((gameName, uri))
+        uri = '/games/' + gameName
+        endpoint = 'game_' + gameName
+        self._games.append((gameName, endpoint, uri))
 
         if hasTemplate:
             msgAdd = ''
@@ -54,7 +55,7 @@ class App(Flask):
                                             games=self._games)
 
         logger.info('Adding route for ' + uri + msgAdd)
-        self.add_url_rule(uri, gameName, route)
+        self.add_url_rule(uri, endpoint, route)
 
 
 def indexPage(games):
