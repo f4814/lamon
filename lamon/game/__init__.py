@@ -38,22 +38,31 @@ class Game(ABC):
     def getPlayerScores(self):
         """
         Get player scores from the server into self._scores
+        Has to return a score for EVERY PLAYER on the server, otherwise
+        self.updatePlayers has to be overwritten.
         :returns: New Scores
         :rtype: Player->Score dict
         """
         pass
 
-    def updatePlayerScores(self):
+    def updatePlayers(self):
         """
-        Update scores of the players
+        Update scores of the players and mark them as online
         """
         oldScores = self._scores
         newScores = self.getPlayerScores()
 
         for player, score in oldScores.items():
-            if newScores.get(player, score) != score:
+            if newScores.get(player, score) != score: # Update Scores
                 points = newScores[player] - score
                 self.players[player].addScore(points, self.name) # TODO Error
+
+            if not player in newScores: # Check if player quit
+                self.players[player].quit(self.gameName)
+
+        for player in newScores: # Check if player entered
+            if not player in oldScores:
+                self.players[player].online(self.gameName)
 
     def dispatch(self):
         """
@@ -70,7 +79,7 @@ class Game(ABC):
 
         while True:
             try:
-                self.updatePlayerScores()
+                self.updatePlayers()
             except GameConnectionError as e:
                 logger.error(str(e))
             sleep(self.delay)

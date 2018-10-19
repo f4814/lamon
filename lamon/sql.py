@@ -2,6 +2,12 @@
 Convenience options for interacting with the database
 """
 import sqlite3
+import re
+
+def regexp(expr, item):
+    """ Custom sqlite regex function """
+    reg = re.compile(expr)
+    return reg.search(item) is not None
 
 def initDatabase(cursor):
     """
@@ -18,7 +24,7 @@ def initDatabase(cursor):
 
         CREATE TABLE scoreUpdate (
             points INTEGER,
-            time INTEGER,
+            time TEXT,
             gameName TEXT,
             playerName TEXT,
             FOREIGN KEY(playerName) REFERENCES player(name));
@@ -28,9 +34,18 @@ def initDatabase(cursor):
             nick TEXT,
             playerName TEXT,
             FOREIGN KEY(playerName) REFERENCES player(name));
+
+        CREATE TABLE inGame (
+            playerName TEXT,
+            gameName TEXT,
+            time INTEGER,
+            timespan INTEGER,
+            FOREIGN KEY(playerName) REFERENCES player(name));
         """
     if not cursor.execute(query).fetchone():
         cursor.executescript(createTables)
+
+    cursor.connection.create_function("REGEXP", 2, regexp)
 
     cursor.connection.commit()
     cursor.close()

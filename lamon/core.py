@@ -6,6 +6,7 @@ import multiprocessing
 import yaml
 import sqlite3
 import logging
+import re
 
 from gevent.pywsgi import WSGIServer
 
@@ -37,7 +38,7 @@ class Core():
         # Initialize flask server
         if self._config['server'] == True:
             self._app = App(self._config)
-        self.server = WSGIServer(('', 5000), self._app)
+        self.server = WSGIServer(('', 3000), self._app)
 
         # Load games
         for game in self._config['games']:
