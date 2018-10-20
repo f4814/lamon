@@ -20,6 +20,23 @@ class TestPlayerMethods(unittest.TestCase):
         with self.assertRaises(PlayerNameError):
             self.players.addPlayer('collisionPlayer')
 
+    def test_getitem(self):
+        self.players.addPlayer('getitemPlayer0')
+        self.players.addPlayer('getitemPlayer1')
+
+        stat = []
+        for i in self.players:
+            if i.name == 'getitemPlayer0' or i.name == 'getitemPlayer1':
+                stat.append(i.name)
+
+        self.assertTrue('getitemPlayer0' in stat and 'getitemPlayer1')
+
+        with self.assertRaises(PlayerNameError):
+            self.players['nonexistentPlayer']
+
+        with self.assertRaises(IndexError):
+            self.players['nonexistentPlayer']
+
     def test_score(self):
         """ Test addPoints and getScore """
         self.players.addPlayer('scorePlayer')
@@ -32,8 +49,8 @@ class TestPlayerMethods(unittest.TestCase):
         progress = []
         for i in range(10,-5):
             progress.append(i)
-            self.assertEqual(self.players['scorePlayer'].getScore(gameNames=i),
-                        sum(i))
+            self.assertEqual(self.players['scorePlayer'].getScore(gameNames=[i]),
+                             sum(i))
 
         self.assertEqual(self.players['scorePlayer'].getScore(), score)
 
@@ -41,8 +58,10 @@ class TestPlayerMethods(unittest.TestCase):
         """ Test addIdentity and getNamName """
         self.players.addPlayer('identityPlayer')
 
+        self.assertFalse(self.players['identityPlayer'].hasIdentity('id1'))
         self.players['identityPlayer'].addIdentity({'id1': 'nick1',
                                                     'id2': 'nick2'})
+        self.assertTrue(self.players['identityPlayer'].hasIdentity('id1'))
 
         self.assertEqual(self.players['identityPlayer'].getName('id1'),
                          'nick1')
@@ -62,10 +81,12 @@ class TestPlayerMethods(unittest.TestCase):
         self.players.addPlayer('inGamePlayer')
 
         self.players['inGamePlayer'].enter("testgame", firstEnter)
+        self.assertTrue(self.players['inGamePlayer'].inGame('testgame'))
         with self.assertRaises(PlayerStateError):
             self.players['inGamePlayer'].enter("testgame", firstEnter)
 
         self.players['inGamePlayer'].quit("testgame", firstquit)
+        self.assertFalse(self.players['inGamePlayer'].inGame('testgame'))
         with self.assertRaises(PlayerStateError):
             self.players['inGamePlayer'].quit("testgame", firstEnter)
 
@@ -79,18 +100,6 @@ class TestPlayerMethods(unittest.TestCase):
             3600)
         self.assertEqual(self.players['inGamePlayer'].getTimeInGame(),
                          7200)
-
-    def test_inGame(self):
-        """ Entering or leaving games two times in a row """
-        self.players.addPlayer('inGameExceptionPlayer')
-
-        self.players['inGameExceptionPlayer'].enter("exceptgame")
-        with self.assertRaises(PlayerStateError):
-            self.players['inGameExceptionPlayer'].enter('exceptgame')
-
-        self.players['inGameExceptionPlayer'].quit('exceptgame')
-        with self.assertRaises(PlayerStateError):
-            self.players['inGameExceptionPlayer'].quit('exceptgame')
 
     def tearDown(self):
         genericTearDown(self)

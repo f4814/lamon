@@ -1,0 +1,25 @@
+main {
+    #gameInfo {
+        .infoElement {
+            display: inline;
+        }
+    }
+
+    .player {
+        * {
+            display: inline;
+        }
+
+        .playerName {
+        }
+
+        .playerNick {
+        }
+
+        .playerScore {
+        }
+
+        .playerOffline {
+        }
+    }
+}

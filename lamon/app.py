@@ -6,17 +6,17 @@ import logging
 from flask import Flask, render_template
 from flask_assets import Environment, Bundle
 
-logger = logging.getLogger(__name__)
-
 class App(Flask):
     """
     Add default rules to Flask, so Core only has to manage watcher routes
     """
-    def __init__(self, config):
+    def __init__(self, config, players):
         super().__init__('lamon', static_folder='css')
+        self.logger.setLevel(logging.DEBUG)
         self._config = config
         self._games = []
         self._assets = Environment(self)
+        self._players = players
 
         # Add default rules
         self.add_url_rule('/', 'index', indexPage(self._games))
@@ -26,8 +26,12 @@ class App(Flask):
         self._assets.url = self.static_url_path
 
         # SCSS Processing
-        scss = Bundle('default.scss', filters='pyscss', output='default.css')
-        self._assets.register('scss_all', scss)
+        scss_default = Bundle('default.scss', filters='pyscss',
+                              output='default.css')
+        scss_templates = Bundle('templates/default.scss', filters='pyscss',
+                                output='templates/default.css')
+        self._assets.register('scss_default', scss_default)
+        self._assets.register('scss_templates', scss_templates)
 
     def add_game_rule(self, gameName, gameConfig, hasTemplate):
         """
@@ -46,15 +50,17 @@ class App(Flask):
             route = lambda: render_template(gameName + '.html',
                                             gameConfig=gameConfig,
                                             gameName=gameName,
-                                            games=self._games)
+                                            games=self._games,
+                                            players=self._players)
         else:
             msgAdd = ' (default template)'
             route = lambda: render_template('game/default.html',
                                             gameConfig=gameConfig,
                                             gameName=gameName,
-                                            games=self._games)
+                                            games=self._games,
+                                            players=self._players)
 
-        logger.info('Adding route for ' + uri + msgAdd)
+        self.logger.info('Adding route for ' + uri + msgAdd)
         self.add_url_rule(uri, endpoint, route)
 
 

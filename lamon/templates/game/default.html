@@ -1,9 +1,53 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ gameName }}
+    {{ gameName }} - Lamon
+{% endblock %}
+
+{% block css %}
+    {% assets "scss_templates" %}
+    <link rel="stylesheet" type="text/css" href="/css/templates/default.css">
+    {% endassets %}
+    {{ super() }}
 {% endblock %}
 
 {% block content %}
-    {{ gameConfig }}
+<div id="gameInfo">
+    <div class="infoElement">
+        {{ gameName }}
+    </div>
+    <div class="infoElement">
+        {{ gameConfig['ip'] }}
+    </div>
+    <div class="infoElement">
+        {{ gameConfig['port'] }}
+    </div>
+</div>
+
+<div id="gamePlayers">
+    {% for player in players %}
+        {% if player.hasIdentity(gameName) %}
+            {% set offline = not player.inGame(gameName) %}
+            {% set score = player.getScore([gameName]) %}
+            {% if not score != 0 or not offline %}
+                <div class="player {% if offline %} offline {% endif %}">
+                    <div class="infoElement playerName">
+                        {{ player.name }}
+                    </div>
+                    <div class="playerNick">
+                        {{ player.getName(gameName) }}
+                    </div>
+                    <div class="playerScore">
+                        {{ score }}
+                    </div>
+                    {% if offline %}
+                        <div class="playerOffline">
+                            (offline)
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
 {% endblock %}

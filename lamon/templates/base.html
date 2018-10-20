@@ -4,9 +4,11 @@
         {% block head %}
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {% assets "scss_all" %}
+        {% block css %}
+        {% assets "scss_default" %}
         <link rel="stylesheet" type="text/css" href="/css/default.css">
         {% endassets %}
+        {% endblock %}
 
         <title>{% block title %}{% endblock %} - Lamon </title>
         {% endblock %}
@@ -39,9 +41,9 @@
                style="float:right" href="/profile">Profile</a>
         </nav>
 
-        <div id="content">
+        <main>
             {% block content %}{% endblock %}
-        </div>
+        <main>
 
         <footer>
             {% block footer %}

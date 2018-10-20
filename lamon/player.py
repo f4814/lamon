@@ -67,6 +67,21 @@ class Player():
                                           'already has an identity in ' + game)
         self._cursor.connection.commit()
 
+    def hasIdentity(self, gameName):
+        """
+        Check wether the player has a identity in game
+        :param gameName: game Name
+        :type gameName: str
+        :rtype: Bool
+        """
+        query = "SELECT nick FROM identity WHERE playerName=? AND gameName=?"
+        result = self._cursor.execute(query, (self.name, gameName)).fetchone()
+        if result != None:
+            return True
+        else:
+            logger.debug(self.name + ' has no identity in ' + gameName)
+            return False
+
     def getName(self, gameName):
         """
         Find the nickname in game
@@ -89,20 +104,21 @@ class Player():
         """
         Get the score of a player
         :param gameNames: List of games to read the score from. None is all
+        :type gameName: List
         :returns: Int score
         """
         score = 0
         querySimple = "SELECT points FROM scoreUpdate WHERE playerName=?"
         queryMany = """
-            SELECT points FROM scoreUpdates
+            SELECT points FROM scoreUpdate
                 WHERE gameName REGEXP ?
                 AND playerName=?
-            """
+        """
 
         if gameNames:
-            scores = self._cursor.execute(queryMany, '|'.join(gameNames),
-                                         self.name)
-            msg = 'in games' + ', '.join(gameNames)
+            scores = self._cursor.execute(queryMany, ('|'.join(gameNames),
+                                          self.name))
+            msg = 'in games ' + ', '.join(gameNames)
         else:
             scores = self._cursor.execute(querySimple, (self.name,))
             msg = 'in all games'
@@ -154,6 +170,20 @@ class Player():
 
         logger.debug(self.name + 'has spent ' + str(span) + 's ' + msg)
         return span
+
+    def inGame(self, gameName):
+        """
+        Check if player is ingame
+        :param gameName: gameName
+        :type gameName: str
+        :rtype: Bool
+        """
+        query = """
+            SELECT * FROM inGame
+            WHERE playerName=? AND gameName=? AND timespan=-1
+        """
+        result = self._cursor.execute(query, (self.name, gameName)).fetchone()
+        return result != None
 
     def enter(self, gameName, time=datetime.now()):
         """
@@ -238,13 +268,19 @@ class Players():
         :raises: PlayerNameError
         """
         cursor = self._sqlConn.cursor()
-        p = Player(key, cursor, create=False)
-        return p
+
+        if type(key) == str:
+            return Player(key, cursor, create=False)
+        elif type(key) == int:
+            query = "SELECT name FROM player"
+            result = cursor.execute(query).fetchall()[key][0]
+            return Player(result, cursor, create=False)
+
 
 class PlayerError(Exception):
     pass
 
-class PlayerNameError(PlayerError):
+class PlayerNameError(PlayerError, IndexError):
     pass
 
 class PlayerIdentityError(PlayerError):

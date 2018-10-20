@@ -37,7 +37,7 @@ class Core():
 
         # Initialize flask server
         if self._config['server'] == True:
-            self._app = App(self._config)
+            self._app = App(self._config, self.players)
         self.server = WSGIServer(('', 3000), self._app)
 
         # Load games
