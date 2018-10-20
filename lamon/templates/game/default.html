@@ -26,7 +26,7 @@
 
 <div id="gamePlayers">
     {% for player in players %}
-        {% if player.hasIdentity(gameName) %}
+        {% if player.hasNick(gameName) %}
             {% set offline = not player.inGame(gameName) %}
             {% set score = player.getScore([gameName]) %}
             {% if not score != 0 or not offline %}
@@ -35,7 +35,7 @@
                         {{ player.name }}
                     </div>
                     <div class="playerNick">
-                        {{ player.getName(gameName) }}
+                        {{ player.getNick(gameName) }}
                     </div>
                     <div class="playerScore">
                         {{ score }}
@@ -50,4 +50,4 @@
         {% endif %}
     {% endfor %}
 </div>
-{% endblock %}
+{% endblock content %}

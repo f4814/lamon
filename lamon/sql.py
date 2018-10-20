@@ -29,7 +29,7 @@ def initDatabase(cursor):
             playerName TEXT,
             FOREIGN KEY(playerName) REFERENCES player(name));
 
-        CREATE TABLE identity (
+        CREATE TABLE nick (
             gameName TEXT,
             nick TEXT,
             playerName TEXT,

@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 
 from lamon.player import Player, Players, PlayerNameError, PlayerStateError, \
-                         PlayerIdentityError
+                         PlayerNickError
 from lamon.sql import initDatabase
 
 class TestPlayerMethods(unittest.TestCase):
@@ -55,22 +55,22 @@ class TestPlayerMethods(unittest.TestCase):
         self.assertEqual(self.players['scorePlayer'].getScore(), score)
 
     def test_identity(self):
-        """ Test addIdentity and getNamName """
+        """ Test addNick, hasNick, getNick"""
         self.players.addPlayer('identityPlayer')
 
-        self.assertFalse(self.players['identityPlayer'].hasIdentity('id1'))
-        self.players['identityPlayer'].addIdentity({'id1': 'nick1',
-                                                    'id2': 'nick2'})
-        self.assertTrue(self.players['identityPlayer'].hasIdentity('id1'))
+        self.assertFalse(self.players['identityPlayer'].hasNick('id1'))
+        self.players['identityPlayer'].addNick({'id1': 'nick1',
+                                                'id2': 'nick2'})
+        self.assertTrue(self.players['identityPlayer'].hasNick('id1'))
 
-        self.assertEqual(self.players['identityPlayer'].getName('id1'),
+        self.assertEqual(self.players['identityPlayer'].getNick('id1'),
                          'nick1')
-        self.assertEqual(self.players['identityPlayer'].getName('id2'),
+        self.assertEqual(self.players['identityPlayer'].getNick('id2'),
                          'nick2')
 
-        with self.assertRaises(PlayerIdentityError):
-            self.players['identityPlayer'].addIdentity({'id1': 'nick1',
-                                                        'id2': 'nick2'})
+        with self.assertRaises(PlayerNickError):
+            self.players['identityPlayer'].addNick({'id1': 'nick1',
+                                                    'id2': 'nick2'})
 
     def test_inGame(self):
         firstEnter = datetime(2000, 1, 1, hour=1)

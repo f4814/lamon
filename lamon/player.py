@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class Player():
     """
-    A player and set of identities on the servers
+    A player and set of nicknames on the servers
     Player objects are created by the Players object and should only be used
     for one task.
     """
@@ -45,60 +45,60 @@ class Player():
 
         # Add identities
         if identities:
-            self.addIdentity(identities)
+            self.addNick(identities)
 
-    def addIdentity(self, identity):
+    def addNick(self, nick):
         """
-        Add a identity to the Player
-        :param identity: Identity dict
-        :type identity: dict
-        :raises: PlayerIdentityError
+        Add a nick to the Player
+        :param nick: Nick dict
+        :type nick: dict
+        :raises: PlayerNickError
         """
-        add = "INSERT INTO identity VALUES (?,?,?)"
-        for game, nick in identity.items():
+        add = "INSERT INTO nick VALUES (?,?,?)"
+        for game, nick in nick.items():
             try:
-                self.getName(game)
-            except PlayerIdentityError:
+                self.getNick(game)
+            except PlayerNickError:
                 self._cursor.execute(add, (game, nick, self.name))
-                logger.debug('Adding identity ' + nick + ' for game ' + game +
+                logger.debug('Adding nick ' + nick + ' for game ' + game +
                             ' for player ' + self.name)
             else:
-                raise PlayerIdentityError('Player ' + self.name + ' already ' +
-                                          'already has an identity in ' + game)
+                raise PlayerNickError('Player ' + self.name + ' already ' +
+                                      'already has an nick in ' + game)
         self._cursor.connection.commit()
 
-    def hasIdentity(self, gameName):
+    def hasNick(self, gameName):
         """
-        Check wether the player has a identity in game
+        Check wether the player has a nickname in game
         :param gameName: game Name
         :type gameName: str
         :rtype: Bool
         """
-        query = "SELECT nick FROM identity WHERE playerName=? AND gameName=?"
+        query = "SELECT nick FROM nick WHERE playerName=? AND gameName=?"
         result = self._cursor.execute(query, (self.name, gameName)).fetchone()
         if result != None:
             return True
         else:
-            logger.debug(self.name + ' has no identity in ' + gameName)
+            logger.debug(self.name + ' has no nick in ' + gameName)
             return False
 
-    def getName(self, gameName):
+    def getNick(self, gameName):
         """
         Find the nickname in game
         :param gameName: Name of the Game
         :param gameName: String
-        :raises: PlayerIdentityError
+        :raises: PlayerNickError
         """
         query = """
-            SELECT nick FROM identity WHERE gameName=? AND playerName=?
+            SELECT nick FROM nick WHERE gameName=? AND playerName=?
         """
         self._cursor.execute(query, (gameName, self.name))
         nick = self._cursor.fetchone()
         if nick != None:
             return nick[0]
         else:
-            raise PlayerIdentityError('Player ' + self.name + ' has no ' +
-                                      'identity in game ' + gameName)
+            raise PlayerNickError('Player ' + self.name + ' has no ' +
+                                   'nick in game ' + gameName)
 
     def getScore(self, gameNames=None):
         """
@@ -283,7 +283,7 @@ class PlayerError(Exception):
 class PlayerNameError(PlayerError, IndexError):
     pass
 
-class PlayerIdentityError(PlayerError):
+class PlayerNickError(PlayerError):
     pass
 
 class PlayerStateError(PlayerError):
