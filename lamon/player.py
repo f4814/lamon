@@ -39,9 +39,9 @@ class Player():
                 cursor.execute(add, (name,))
                 cursor.connection.commit()
             else:
-                raise PlayerNameError('Player ' + name + ' does not exist')
+                raise PlayerNameError(name, 'Player does not exist')
         elif create:
-            raise PlayerNameError('Player ' + name + ' already exists')
+            raise PlayerNameError(name, 'Player already exists')
 
         # Add identities
         if identities:
@@ -50,7 +50,7 @@ class Player():
     def addNick(self, nick):
         """
         Add a nick to the Player
-        :param nick: Nick dict
+        :param nick: Dict of gameNames (key) and nickNames (values)
         :type nick: dict
         :raises: PlayerNickError
         """
@@ -63,8 +63,8 @@ class Player():
                 logger.debug('Adding nick ' + nick + ' for game ' + game +
                             ' for player ' + self.name)
             else:
-                raise PlayerNickError('Player ' + self.name + ' already ' +
-                                      'already has an nick in ' + game)
+                raise PlayerNickError(self.name, 'Player already ' +
+                                      'has a nick in ' + game)
         self._cursor.connection.commit()
 
     def hasNick(self, gameName):
@@ -97,8 +97,8 @@ class Player():
         if nick != None:
             return nick[0]
         else:
-            raise PlayerNickError('Player ' + self.name + ' has no ' +
-                                   'nick in game ' + gameName)
+            raise PlayerNickError(self.name, 'Player has no ' +
+                                  'nick in game ' + gameName)
 
     def getScore(self, gameNames=None):
         """
@@ -108,23 +108,21 @@ class Player():
         :returns: Int score
         """
         score = 0
-        querySimple = "SELECT points FROM scoreUpdate WHERE playerName=?"
-        queryMany = """
+        query = """
             SELECT points FROM scoreUpdate
-                WHERE gameName REGEXP ?
-                AND playerName=?
+            WHERE playerName=? AND gameName REGEXP ?
         """
 
         if gameNames:
-            scores = self._cursor.execute(queryMany, ('|'.join(gameNames),
-                                          self.name))
+            scores = self._cursor.execute(
+                query, (self.name, '|'.join(gameNames))).fetchall()
             msg = 'in games ' + ', '.join(gameNames)
         else:
-            scores = self._cursor.execute(querySimple, (self.name,))
+            scores = self._cursor.execute(query, (self.name, '.*')).fetchall()
             msg = 'in all games'
 
         for s in scores:
-            score += s
+            score += s[0]
 
         logger.debug(self.name + '\'s score ' + msg + ' is: ' + str(score))
         return score
@@ -137,8 +135,8 @@ class Player():
         :param gameName: Name of the game
         :type gameName: String
         """
-        query = "INSERT INTO scoreUpdate (?, ?, ?, ?)"
-        logger.debug('Adding ' + str(points) + ' in game ' + gameName + ' to' +
+        query = "INSERT INTO scoreUpdate VALUES (?, ?, ?, ?)"
+        logger.debug('Adding ' + str(points) + ' points in game ' + gameName + ' to' +
                      self.name)
         self._cursor.execute(query, (points, str(datetime.now()),
                              gameName, self.name))
@@ -199,9 +197,9 @@ class Player():
 
         if not self._cursor.execute(query, (self.name, gameName)).fetchone():
             self._cursor.execute(add, (self.name, gameName, str(time)))
-            logger.debug(self.name + ' enters ' + gameName)
+            logger.debug(self.name + ' entered ' + gameName)
         else:
-            raise PlayerStateError("Player can not enter game")
+            raise PlayerStateError(self.name, "Player can not enter game")
 
     def quit(self, gameName, now=datetime.now()):
         """
@@ -230,9 +228,9 @@ class Player():
             newTimespan = delta.total_seconds()
             self._cursor.execute(update, (newTimespan, self.name, gameName))
             self._cursor.connection.commit()
-            logger.debug(self.name + ' quits ' + gameName)
+            logger.debug(self.name + ' quit ' + gameName)
         else:
-            raise PlayerStateError("Player can not quit game")
+            raise PlayerStateError(self.name, "Player can not quit game")
 
 
 class Players():
@@ -259,6 +257,21 @@ class Players():
         """ Name for __getitem__"""
         return self[name]
 
+    def getByNick(self, gameName, nick):
+        """
+        Get a player by his nickname in game
+        :rtype: Player:
+        :raises: PlayerNickError
+        """
+        cursor = self._sqlConn.cursor()
+        query = "SELECT playerName FROM nick WHERE nick=? AND gameName=?"
+        result = cursor.execute(query, (nick, gameName)).fetchone()
+
+        if result != None:
+            return Player(result[0], cursor, create=False)
+        else:
+            raise PlayerNickError("None", 'No nick ' + nick + ' in game ' + gameName)
+
     def __getitem__(self, key):
         """
         Get Player by name
@@ -278,7 +291,12 @@ class Players():
 
 
 class PlayerError(Exception):
-    pass
+    def __init__(self, playerName, msg):
+        self.playerName = playerName
+        self.msg = msg
+        self.message = '[' + playerName + ']' + ' ' + msg
+
+        super().__init__(self.message)
 
 class PlayerNameError(PlayerError, IndexError):
     pass

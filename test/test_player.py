@@ -20,9 +20,11 @@ class TestPlayerMethods(unittest.TestCase):
         with self.assertRaises(PlayerNameError):
             self.players.addPlayer('collisionPlayer')
 
-    def test_getitem(self):
+    def test_get(self):
+        """ Test __getitem__ and getByNick """
         self.players.addPlayer('getitemPlayer0')
         self.players.addPlayer('getitemPlayer1')
+        self.players.addPlayer('getByNickPlayer')
 
         stat = []
         for i in self.players:
@@ -31,26 +33,34 @@ class TestPlayerMethods(unittest.TestCase):
 
         self.assertTrue('getitemPlayer0' in stat and 'getitemPlayer1')
 
+        self.players['getByNickPlayer'].addNick({'nickGame': 'nickPlayer'})
+        nickPlayer = self.players.getByNick('nickGame', 'nickPlayer')
+        self.assertTrue(nickPlayer.name == 'getByNickPlayer')
+
         with self.assertRaises(PlayerNameError):
             self.players['nonexistentPlayer']
 
         with self.assertRaises(IndexError):
             self.players['nonexistentPlayer']
 
+        with self.assertRaises(PlayerNickError):
+            self.players.getByNick('nonexistentGame', 'nonexistentPlayer')
+
     def test_score(self):
         """ Test addPoints and getScore """
         self.players.addPlayer('scorePlayer')
+        games = "abcdefghijklmnopqrstuvwxyz"
 
         score = 0
-        for i in range(10,-5):
-            self.players['scorePlayer'].addPoints(i, str(i))
+        for i in range(-5,10):
+            self.players['scorePlayer'].addPoints(i, games[i])
             score += i
 
         progress = []
-        for i in range(10,-5):
+        for i in range(-5,10):
             progress.append(i)
-            self.assertEqual(self.players['scorePlayer'].getScore(gameNames=[i]),
-                             sum(i))
+            self.assertEqual(self.players['scorePlayer'].getScore(
+                             gameNames=[games[i]]), i)
 
         self.assertEqual(self.players['scorePlayer'].getScore(), score)
 
