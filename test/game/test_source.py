@@ -9,7 +9,7 @@ class TestSourceExceptions(unittest.TestCase):
     def setUp(self):
         self.sqlConn = sqlite3.connect(':memory:')
         players = Players(self.sqlConn)
-        config = {'ip': '127.0.0.1', 'port': 6582, 'delay': 1}
+        config = {'ip': '127.0.0.1', 'port': 6582, 'delay': 1, 'timeout': 0.5}
 
         self.game = SourceDummy(players, config)
 

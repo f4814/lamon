@@ -1,0 +1,11 @@
+* Make game testsuite work
+
+* Improve webinterface design
+
+* Add player info pages
+
+* Normalize scores
+
+* Add Usermanagement to webinterface
+
+* Save games in database (make gameName less obscure)

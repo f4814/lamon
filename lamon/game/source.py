@@ -15,19 +15,19 @@ class Source(Game):
 
     def connect(self):
         """ Initialize ServerQuerier """
-        self.querier = ServerQuerier((self.ip, self.port))
+        self.querier = ServerQuerier((self.ip, self.port), self.timeout)
 
         # Is the correct game running?
         try:
             if self.querier.info()['game'] != self.internalName:
                 msg = 'Server (' + self.ip + ') is not running the specified game'
-                raise GameTypeError(self.name, msg)
+                raise GameTypeError(self.name, self.ip, msg)
         except NoResponseError:
             raise GameConnectionError(self.name, (self.ip, self.port),
                                      'Cannot connect to server')
 
-        logger.info('Connected to ' + self.name + 'server on ' +
-                    str((self.ip, self.port)), '.')
+        logger.info('Connected to ' + self.name + ' server on ' +
+                    str((self.ip, self.port)) + '.')
 
     def getPlayerScores(self):
         self._scores = {}
@@ -40,8 +40,8 @@ class Source(Game):
 
         for p in players:
             self._scores[p['name']] = p['score']
-            logger.debug(self.scores)
 
+        logger.debug(self._scores)
         return self._scores
 
     def close(self):

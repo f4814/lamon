@@ -10,7 +10,7 @@ import re
 
 from gevent.pywsgi import WSGIServer
 
-from .player import Players
+from .player import Players, PlayerNameError
 from .app import App
 from .sql import initDatabase
 
@@ -33,7 +33,10 @@ class Core():
         # Load players
         self.players = Players(self._sqlConn)
         for key, value in self._config['players'].items():
-            self.players.addPlayer(key, value['nicks'])
+            try:
+                self.players.addPlayer(key, value['nicks'])
+            except PlayerNameError:
+                logger.info('Player ' + key + ' already exists')
 
         # Initialize flask server
         if self._config['server'] == True:
