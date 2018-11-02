@@ -40,7 +40,7 @@ class Game(ABC):
     @abstractmethod
     def getPlayerScores(self):
         """
-        Get player scores from the server into self._scores (nick->scores dict)
+        Return scores from server (nick->scores dict)
         Has to return a score for EVERY PLAYER on the server, otherwise
         self.updatePlayers has to be overwritten.
         :returns: New Scores
@@ -70,6 +70,8 @@ class Game(ABC):
             if not nick in oldScores:
                 logger.debug('Nick ' + nick + ' entered ' + self.name)
                 self._safePlayer(nick, Player.enter, (self.name,))
+
+        self._scores = newScores
 
     def dispatch(self):
         """
