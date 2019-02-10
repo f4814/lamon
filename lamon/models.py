@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserMixin
 from sqlalchemy import DateTime
+from sqlalchemy.orm.exc import NoResultFound
 from datetime import datetime
 
 from lamon import db
@@ -11,6 +12,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(255))
+    is_enabled = True
 
     nicknames = db.relationship('Nickname', back_populates='user')
     watchers = db.relationship('UserWatcher', back_populates='user')
@@ -18,11 +20,17 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary='user_roles',
                             backref=db.backref('users', lazy='dynamic'))
 
+    def __repr__(self):
+        return self.username
+
 class Role(db.Model):
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
+
+    def __repr__(self):
+        return self.name
 
 class UserRoles(db.Model):
     __tabelname__ = 'user_roles'
@@ -43,6 +51,10 @@ class Nickname(db.Model):
     gameID = db.Column(db.Integer, db.ForeignKey('games.id', ondelete='CASCADE'))
     game = db.relationship('Game', back_populates='nicknames')
 
+    def __repr__(self):
+        r = "{} is {} in {}"
+        return r.format(self.user, self.nick, self.game)
+
 class Score(db.Model):
     __tablename__ = 'scores'
 
@@ -62,6 +74,10 @@ class Score(db.Model):
         self.game = game
         self.user = user
 
+    def __repr__(self):
+        r = "{} points at {} in {}"
+        return r.format(self.points, self.time, self.game)
+
 class Game(db.Model):
     __tablename__ = 'games'
 
@@ -70,6 +86,9 @@ class Game(db.Model):
     scores = db.relationship('Score', back_populates='game')
     nicknames = db.relationship('Nickname', back_populates='game')
     watchers = db.relationship('GameWatcher', back_populates='game')
+
+    def __repr__(self):
+        return self.name
 
 class GameWatcher(db.Model):
     __tablename__ = 'gamewatchers'

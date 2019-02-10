@@ -10,18 +10,23 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/lamon'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'secret'
+    app.config['SQLALCHEMY_DATABASE_URI']            = 'postgresql://postgres:123@localhost/lamon'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS']     = False
+    app.config['SECRET_KEY']                         = 'secret'
+    app.config['USER_ENABLE_EMAIL']                  = False
 
     # Database
     db.init_app(app)
     migrate.init_app(app, db)
 
     # User Manager
-    from .models import User, Role
+    from .models import User
     db_adapter = SQLAlchemyAdapter(db, User)
     user_manager = UserManager(db_adapter, app)
+
+    # Admin views
+    from .admin import register_admin
+    register_admin(app)
 
     # Register blueprints
     from .views import register_blueprints
