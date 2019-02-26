@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Gamewatcher Control{% endblock %}
+
+{% block content %}
+<form method="POST">
+    {{ form.csrf_token }}<br>
+    {{ form.watcherID.label }} {{ form.watcherID() }}<br>
+    {{ form.action.label }} {{ form.action() }}<br>
+    <input type="submit" value="Go">
+{% endblock %}
+

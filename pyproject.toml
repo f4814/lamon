@@ -15,6 +15,7 @@ Flask-Migrate = "^2.3"
 flask-user = "=0.6.21"
 psycopg2 = "^2.7"
 flask-admin = "^1.5"
+flask-wtf = "^0.14.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

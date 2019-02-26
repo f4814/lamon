@@ -11,6 +11,8 @@
         {% block body %}
         <div id="header">
             <a href="{{ url_for('main.index') }}">Home</a>
+            <a href="{{ url_for('games.index') }}">Games</a>
+            <a href="{{ url_for('watchers.index') }}">Watchers</a>
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('user.profile') }}">Profile</a>
                 <a href="{{ url_for('user.logout') }}">Logout</a>

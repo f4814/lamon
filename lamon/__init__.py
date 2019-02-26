@@ -14,6 +14,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS']     = False
     app.config['SECRET_KEY']                         = 'secret'
     app.config['USER_ENABLE_EMAIL']                  = False
+    app.config['LOGGER_NAME']                        = __name__
 
     # Database
     db.init_app(app)
@@ -35,5 +36,9 @@ def create_app():
     # Register cli commands
     from .cmd import register_cmds
     register_cmds(app)
+
+    # Start Watchers
+    from .watcher.manager import WatcherManager
+    watcher_manager = WatcherManager(app, db)
 
     return app
