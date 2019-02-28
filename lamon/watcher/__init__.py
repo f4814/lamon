@@ -35,7 +35,8 @@ class Watcher(ABC, Thread):
     def stop(self):
         self.shutdown = False
 
-        query = db.session.query(WatcherModel).filter(WatcherModel.id == self.model.id)
+        query = db.session.query(WatcherModel).filter(
+            WatcherModel.id == self.model.id)
         query.update({WatcherModel.state: 'STOPPING'})
         db.session.commit()
 

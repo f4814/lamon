@@ -8,13 +8,14 @@ __version__ = '0.1.0'
 db = SQLAlchemy()
 migrate = Migrate()
 
+
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI']            = 'postgresql://postgres:123@localhost/lamon'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS']     = False
-    app.config['SECRET_KEY']                         = 'secret'
-    app.config['USER_ENABLE_EMAIL']                  = False
-    app.config['LOGGER_NAME']                        = __name__
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/lamon'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = 'secret'
+    app.config['USER_ENABLE_EMAIL'] = False
+    app.config['LOGGER_NAME'] = __name__
 
     # Database
     db.init_app(app)
