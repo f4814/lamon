@@ -1,4 +1,4 @@
-from valve.source.a2s import ServerQuerier
+from valve.source.a2s import ServerQuerier, NoResponseError
 
 from . import GameWatcher
 from .. import WatcherException
@@ -6,26 +6,29 @@ from .. import WatcherException
 
 class SourceEngineWatcher(GameWatcher):
     def __init__(self, model):
-        print(__name__)
-        super().__init__(model, __name__)
-        self.load_config()
-        self.server_name = ""
+        configKeys = ["address", "port", "timeout", "app_id"]
+        super().__init__(model, __name__, configKeys)
 
-    def load_config(self):
-        self._address = "185.82.20.194"
-        self._port = 27015
-        self._timeout = 2
-        self._state = ""
-        self._app_id = 4000
-
-    def run(self):
+    def runner(self):
         # Setup valve server querier
-        with ServerQuerier((self._address, self._port), self._timeout) as server:
-            if server.info()['app_id'] != self._app_id:
-                raise WatcherException("Wrong app id on server")
+        addr = (self.config['address'], self.config['port'])
+        with ServerQuerier(addr, self.config['timeout']) as server:
             while getattr(self, 'shutdown', True):
-                # self.server_name = server.info()['server_name']
-                self._updatePlayers()
+                try:
+                    if server.info()['app_id'] != int(self.config['app_id']):
+                        raise WatcherException("Wrong app id on server: {}".format(server.info()['app_id']))
+                    self._updatePlayers(server.players()['players'])
+                except NoResponseError:
+                    self.logger.warning("Watcher connection failure")
 
-    def _updatePlayers(self):
-        pass
+    def _updatePlayers(self, players):
+        for p in players:
+            if not p['name']:  # Valve doc mentions possible empty players
+                continue
+
+            self.addScore(p['name'], p['score'])
+
+    def reload(self):
+        super().reload()
+        self.config['port'] = int(self.config['port'])
+        self.config['timeout'] = float(self.config['timeout'])

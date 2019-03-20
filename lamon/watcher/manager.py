@@ -31,7 +31,6 @@ class WatcherManager():
     def start(self, id=None, model=None):
         app = current_app
 
-
         if id is not None:
             model = WatcherModel.query.filter(WatcherModel.id == id).one()
 

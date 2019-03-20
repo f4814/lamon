@@ -72,14 +72,29 @@ class Score(db.Model):
     userID = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', back_populates='scores')
 
+    nicknameID = db.Column(db.Integer, db.ForeignKey('nicknames.id'))
+
     gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
     game = db.relationship('Game', back_populates='scores')
 
-    def __init__(self, points, time=datetime.now(), game=None, user=None):
+    def __init__(self, points, time=None, game=None, user=None, nick=None):
         self.points = points
-        self.time = time
-        self.game = game
-        self.user = user
+
+        if time:
+            self.time = time
+        else:
+            self.time = datetime.Now()
+
+        if game:
+            self.game = game
+            self.gameID = game.id
+
+        if user:
+            self.user = user
+            self.userID = user.id
+
+        if nick:
+            self.nicknameID = nick.id
 
     def __repr__(self):
         r = "{} points at {} in {}"
