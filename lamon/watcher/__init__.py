@@ -89,9 +89,12 @@ class ConnectionException(Exception):
     pass
 
 
-def create_watcher_object(watcher, className):
+def load_watcher_class(className):
     module = import_module(".".join(className.split(".")[:-1]))
 
     watcher_ = getattr(module, className.split(".")[-1])
+
+    if not issubclass(watcher_, Watcher):
+        raise TypeError("{} is not a subclass of watcher".format(str(watcher_)))
 
     return watcher_

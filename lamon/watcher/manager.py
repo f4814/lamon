@@ -3,7 +3,7 @@ import threading
 from flask import current_app
 
 from ..models import Watcher as WatcherModel
-from ..watcher import Watcher, create_watcher_object
+from ..watcher import Watcher, load_watcher_class
 
 from lamon import db
 
@@ -43,8 +43,7 @@ class WatcherManager():
                         "Cannot start already running watcher: {}".format(model))
                     return
 
-        watcher_ = create_watcher_object(
-            WatcherModel, model.threadClass)
+        watcher_ = load_watcher_class(model.threadClass)
         watcher = watcher_(model)
         watcher.start()
 
