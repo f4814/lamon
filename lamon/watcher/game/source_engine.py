@@ -26,7 +26,7 @@ class SourceEngineWatcher(GameWatcher):
             if not p['name']:  # Valve doc mentions possible empty players
                 continue
 
-            self.addScore(p['name'], p['score'])
+            self.add_score(p['name'], p['score'])
 
     def reload(self):
         super().reload()
