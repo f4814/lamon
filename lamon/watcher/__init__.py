@@ -13,6 +13,12 @@ from ..models import Nickname, Score, WatcherConfig
 
 class Watcher(ABC, Thread):
     def __init__(self, model, logName, configKeys):
+        qualname = type(self).__module__ + "." + type(self).__name__
+        if qualname != model.threadClass:
+            raise TypeError("""Cannot initalize watcher of class {} with model
+                            where threadClass == {}""".
+                            format(qualname, model.threadClass))
+
         super().__init__(name='Watcher-{}'.format(model.id))
         self.config_keys = configKeys
         self._model = model

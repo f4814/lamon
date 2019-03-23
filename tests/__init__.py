@@ -89,7 +89,7 @@ class BaseTestCase(TestCase):
         db.session.add(test2_user)
 
         watcher = Watcher(
-            state='STOPPED', threadClass='tests.watcher.fake.FakeWatcher')
+            state='STOPPED', threadClass='tests.test_watcher.fake.FakeWatcher')
         db.session.add(watcher)
 
         db.session.commit()

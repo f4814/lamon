@@ -47,6 +47,14 @@ class TestWatcher(BaseTestCase):
 
         super().tearDown()
 
+    def test_invalid_threadClass(self):
+        """ Test for correct error when initializing watcher with wrong model """
+        with self.assertRaises(TypeError):
+            model = self.watcher
+            model.threadClass = 'nop'
+
+            FakeWatcher(model, [])
+
     def test_start(self):
         """ Test starting watcher thread """
         self.watcher.start()
