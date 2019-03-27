@@ -8,8 +8,12 @@ install: build
 
 .PHONY: test
 test:
-	python -m unittest discover	
+	poetry run python -m unittest discover	
 
 .PHONY: clean
 clean:
 	rm -rf dist
+
+.PHONY: run
+run:
+	FLASK_APP=lamon FLASK_ENV=development poetry run flask run

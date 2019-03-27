@@ -41,7 +41,7 @@ class TestWatcher(BaseTestCase):
         session = scoped_session(sessionmaker(bind=db.engine))
 
         self.watcher = FakeWatcher(
-            session=session, model_id=self.watcher_model.id, config_keys=[])
+            session=session, model_id=self.watcher_model.id)
 
     def tearDown(self):
         """ Kill fake watcher """
@@ -63,13 +63,6 @@ class TestWatcher(BaseTestCase):
     def test_start(self):
         """ Test starting watcher thread """
         self.watcher.start()
-        self.assertTrue(self.watcher._model.state == 'RUNNING')
-
-        # Check database sync of watcher Model
-        watcher_id = self.watcher._model.id
-        query = db.session.query(WatcherModel).filter(
-            WatcherModel.id == watcher_id)
-        self.assertTrue(query.one().state == 'RUNNING')
 
         for t in threading.enumerate():
             if isinstance(t, Watcher):
@@ -87,14 +80,6 @@ class TestWatcher(BaseTestCase):
         for t in threading.enumerate():
             if isinstance(t, Watcher):
                 self.assertFalse(t.name == self.watcher.name)
-
-        self.assertTrue(self.watcher._model.state == 'STOPPED')
-
-        # Check database sync of watcher Model
-        watcher_id = self.watcher._model.id
-        query = db.session.query(WatcherModel).filter(
-            WatcherModel.id == watcher_id)
-        self.assertTrue(query.one().state == 'STOPPED')
 
     def test_reload(self):
         """ Test reloading mechanism """
