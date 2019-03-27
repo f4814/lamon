@@ -1,5 +1,3 @@
-import threading
-
 from flask import current_app
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -8,6 +6,12 @@ from ..watcher import Watcher, load_watcher_class
 
 
 class WatcherManager():
+    """ Manage watchers in a Flask application.
+
+    :param app: Flask app to bind to
+    :param db: Flask-SQLAlchemy Database to use
+    """
+
     def __init__(self, app=None, db=None):
         self.app = app
         self.db = db
@@ -17,10 +21,29 @@ class WatcherManager():
             self.init_app(app, db)
 
     def init_app(self, app, db):
+        """ Attach to application
+
+        :param app: Flask app to attach to
+        :param db: Flask-SQLAlchemy Database to use
+        """
         app.watcher_manager = self
         self.db = db
 
     def start(self, id=None, model=None):
+        """ Start a watcher.
+
+        Either id or model is required as argument
+
+        :type id: int
+        :param id: Database id of watcher (Default value = None)
+
+        :type model: :class:`lamon.model.Watcher`
+        :param model: Database model of watcher (Default value = None)
+
+        :raises ValueError: When watcher is already running
+        :raises TypeError: When threadClass of watcher model is no subclass of
+            Watcher
+        """
         app = current_app
 
         if id is not None:
@@ -46,6 +69,18 @@ class WatcherManager():
         watcher.start()
 
     def reload(self, id=None, model=None):
+        """ Reload the configuration of a watcher
+
+        Either id or model is required as argument
+
+        :type id: int
+        :param id: Database id of watcher (Default value = None)
+
+        :type model: :class:`lamon.model.Watcher`
+        :param model: Database model of watcher (Default value = None)
+
+        :raises ValueError: When watcher is not running
+        """
         app = current_app
 
         if id is not None:
@@ -61,6 +96,18 @@ class WatcherManager():
                 "Cannot reload watcher (id={}). Not running".format(id))
 
     def stop(self, id=None, model=None):
+        """ Stop a watcher
+
+        Either id or model is required as argument
+
+        :type id: int
+        :param id: Database id of watcher (Default value = None)
+
+        :type model: :class:`lamon.model.Watcher`
+        :param model: Database model of watcher (Default value = None)
+
+        :raises ValueEror: When watcher is not running
+        """
         app = current_app
 
         if id is not None:
@@ -78,6 +125,18 @@ class WatcherManager():
                 "Cannot stop watcher (id={}). Not running".format(id))
 
     def is_running(self, id=None, model=None):
+        """ Check if given watcher is currently running
+
+        Either id or model is required as argument
+
+        :type id: int
+        :param id: Database id of watcher (Default value = None)
+
+        :type model: :class:`lamon.model.Watcher`
+        :param model: Database model of watcher (Default value = None)
+
+        :returns: :class:`bool`
+        """
         app = current_app
 
         if id is None:

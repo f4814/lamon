@@ -17,3 +17,7 @@ clean:
 .PHONY: run
 run:
 	FLASK_APP=lamon FLASK_ENV=development poetry run flask run
+
+.PHONY: html
+html:
+	poetry run sphinx-build -b html docs docs/_build
