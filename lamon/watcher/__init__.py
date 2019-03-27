@@ -12,28 +12,42 @@ from ..models import Nickname, Score, WatcherConfig
 
 
 class Watcher(ABC, Thread):
-    def __init__(self, model, logName, configKeys):
-        qualname = type(self).__module__ + "." + type(self).__name__
-        if qualname != model.threadClass:
-            raise TypeError("""Cannot initalize watcher of class {} with model
-                            where threadClass == {}""".
-                            format(qualname, model.threadClass))
+    def __init__(self, logName, **kwargs):
+        # Get Kwargs
+        self.config_keys = kwargs['config_keys']
+        self._session = kwargs['session']
 
-        super().__init__(name='Watcher-{}'.format(model.id))
-        self.config_keys = configKeys
-        self._model = model
+        # Setup logger
         self.logger = getLogger(logName)
         self.logger.setLevel(10)
         self.logger.addHandler(StreamHandler(sys.stdout))
 
+        # Load Model
+        self._model = self._session.query(WatcherModel).\
+            filter(WatcherModel.id == kwargs['model_id']).one()
+
+        # Check for correct model
+        qualname = type(self).__module__ + "." + type(self).__name__
+        if qualname != self._model.threadClass:
+            raise TypeError("""Cannot initalize watcher of class {} with model
+                            where threadClass == {}""".
+                            format(qualname, self._model.threadClass))
+
+        # Load config
         self.config = {}
-        for k in configKeys:
+        for k in self.config_keys:
             self.config[k] = None
         self.reload()
 
+        # Initialize threading.Thread
+        super().__init__(name='Watcher-{}'.format(self._model.id))
+
     def run(self):
+        self.reload()
+
         self._model.state = 'RUNNING'
-        db.session.commit()
+        self._session.add(self._model)
+        self._session.commit()
 
         try:
             self.runner()
@@ -45,8 +59,11 @@ class Watcher(ABC, Thread):
         pass
 
     def reload(self):
+        self._model = self._session.query(WatcherModel).\
+            filter(WatcherModel.id == self._model.id).one()
+
         for k in self.config_keys:
-            query = db.session.query(WatcherConfig).\
+            query = self._session.query(WatcherConfig).\
                 filter(WatcherConfig.watcherID == self._model.id).\
                 filter(WatcherConfig.key == k)
             try:
@@ -55,33 +72,34 @@ class Watcher(ABC, Thread):
                 self.logger.warning("No config w/ key found: {}".format(k))
 
     def add_score(self, nickname, points):
-        query = db.session.query(Nickname).\
+        query = self._session.query(Nickname).\
             filter(Nickname.nick == nickname).\
             filter(Nickname.gameID == self._model.gameID)
 
         try:
             nickModel = query.One()
-
-            score = Score(points, game=self._model.game,
-                          user=nickModel.user, nick=nickModel)
-
-            db.session.add(score)
-            db.session.commit()
         except NoResultFound:
             self.logger.warning("Unknown nickname: {}".format(nickname))
+
+        score = Score(points, game=self._model.game,
+                      user=nickModel.user, nick=nickModel)
+
+        self._session.add(score)
+        self._session.commit()
 
     def stop(self):
         self.shutdown = False
 
-        query = db.session.query(WatcherModel).filter(
+        query = self._session.query(WatcherModel).filter(
             WatcherModel.id == self._model.id)
         query.update({WatcherModel.state: 'STOPPING'})
-        db.session.commit()
+        self._session.commit()
 
         self.join()
 
         query.update({WatcherModel.state: 'STOPPED'})
-        db.session.commit()
+        self._session.commit()
+        self._session.close()
 
     def __repr__(self):
         return str(self._model)

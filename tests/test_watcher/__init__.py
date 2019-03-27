@@ -1,5 +1,7 @@
 import threading
 
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 from lamon.watcher import load_watcher_class, Watcher
 from lamon.watcher.game.source_engine import SourceEngineWatcher
 from lamon.models import Watcher as WatcherModel
@@ -36,7 +38,10 @@ class TestWatcher(BaseTestCase):
     def setUp(self):
         """ Start a fake watcher """
         super().setUp()
-        self.watcher = FakeWatcher(self.watcher_model, [])
+        session = scoped_session(sessionmaker(bind=db.engine))
+
+        self.watcher = FakeWatcher(
+            session=session, model_id=self.watcher_model.id, config_keys=[])
 
     def tearDown(self):
         """ Kill fake watcher """
@@ -62,7 +67,8 @@ class TestWatcher(BaseTestCase):
 
         # Check database sync of watcher Model
         watcher_id = self.watcher._model.id
-        query = db.session.query(WatcherModel).filter(WatcherModel.id == watcher_id)
+        query = db.session.query(WatcherModel).filter(
+            WatcherModel.id == watcher_id)
         self.assertTrue(query.one().state == 'RUNNING')
 
         for t in threading.enumerate():
@@ -86,7 +92,8 @@ class TestWatcher(BaseTestCase):
 
         # Check database sync of watcher Model
         watcher_id = self.watcher._model.id
-        query = db.session.query(WatcherModel).filter(WatcherModel.id == watcher_id)
+        query = db.session.query(WatcherModel).filter(
+            WatcherModel.id == watcher_id)
         self.assertTrue(query.one().state == 'STOPPED')
 
     def test_reload(self):

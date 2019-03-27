@@ -5,9 +5,9 @@ from .. import WatcherException
 
 
 class SourceEngineWatcher(GameWatcher):
-    def __init__(self, model):
-        configKeys = ["address", "port", "timeout", "app_id"]
-        super().__init__(model, __name__, configKeys)
+    def __init__(self, **kwargs):
+        config_keys = ["address", "port", "timeout", "app_id"]
+        super().__init__(__name__, config_keys=config_keys, **kwargs)
 
     def runner(self):
         # Setup valve server querier

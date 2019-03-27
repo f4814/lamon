@@ -1,6 +1,7 @@
 import threading
 
 from flask import current_app
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from ..models import Watcher as WatcherModel
 from ..watcher import Watcher, load_watcher_class
@@ -33,18 +34,23 @@ class WatcherManager():
 
         if id is not None:
             model = WatcherModel.query.filter(WatcherModel.id == id).one()
+        elif model is not None:
+            id = model.id
 
         app.logger.info("Starting gamewatcher: {}".format(model))
 
         if model.state == 'RUNNING':
             for t in threading.enumerate():
-                if isinstance(t, Watcher) and t.model.id == id:
+                if isinstance(t, Watcher) and t._model.id == id:
                     app.logger.warning(
                         "Cannot start already running watcher: {}".format(model))
                     return
 
+        # Create db session not connected to flask
+        session = scoped_session(sessionmaker(bind=db.engine))
+
         watcher_ = load_watcher_class(model.threadClass)
-        watcher = watcher_(model)
+        watcher = watcher_(session=session, model_id=id)
         watcher.start()
 
     def reload(self, id=None, model=None):
@@ -59,7 +65,7 @@ class WatcherManager():
             return
 
         for t in threading.enumerate():
-            if isinstance(t, WatcherModel) and t.model.id == model.id:
+            if isinstance(t, WatcherModel) and t._model.id == model.id:
                 t.reload()
 
     def stop(self, id=None, model=None):
@@ -69,11 +75,11 @@ class WatcherManager():
             model = WatcherModel.query.filter(WatcherModel.id == id).one()
 
         for t in threading.enumerate():
-            if isinstance(t, Watcher) and t.model.id == model.id:
-                if t.model.state == 'STOPPED':
+            if isinstance(t, Watcher) and t._model.id == model.id:
+                if t._model.state == 'STOPPED':
                     app.logger.warn(
                         "Stopping already stopped watcher: {}".format(model))
-                elif t.model.state == 'STOPPING':
+                elif t._model.state == 'STOPPING':
                     app.logger.warn(
                         "Watcher already stopping: {}".format(model))
                 else:

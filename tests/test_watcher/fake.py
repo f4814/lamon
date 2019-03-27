@@ -5,8 +5,8 @@ from lamon.watcher import Watcher
 class FakeWatcher(Watcher):
     """ Testing watcher. Does nothing """
 
-    def __init__(self, model, configKeys):
-        super().__init__(model, __name__, configKeys)
+    def __init__(self, **kwargs):
+        super().__init__(logName=__name__, **kwargs)
 
     def runner(self):
         while getattr(self, 'shutdown', True):

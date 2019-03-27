@@ -19,7 +19,7 @@ class BaseTestCase(TestCase):
         # TODO Move to config file
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
         app.config['HASH_ROUNDS'] = 1
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['SECRET_KEY'] = 'secret'
