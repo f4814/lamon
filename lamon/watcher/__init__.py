@@ -45,7 +45,6 @@ class Watcher(ABC, Thread):
     def run(self):
         self.reload()
 
-        self._model.state = 'RUNNING'
         self._session.add(self._model)
         self._session.commit()
 
@@ -90,14 +89,8 @@ class Watcher(ABC, Thread):
     def stop(self):
         self.shutdown = False
 
-        query = self._session.query(WatcherModel).filter(
-            WatcherModel.id == self._model.id)
-        query.update({WatcherModel.state: 'STOPPING'})
-        self._session.commit()
-
         self.join()
 
-        query.update({WatcherModel.state: 'STOPPED'})
         self._session.commit()
         self._session.close()
 

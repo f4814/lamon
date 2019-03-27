@@ -118,7 +118,6 @@ class Watcher(db.Model):
     __tablename__ = 'watchers'
 
     id = db.Column(db.Integer, primary_key=True)
-    state = db.Column(db.String)  # Can be 'RUNNING', 'STOPPED', 'STOPPING'
     threadClass = db.Column(db.String)
     config = db.relationship('WatcherConfig')
 
@@ -130,8 +129,8 @@ class Watcher(db.Model):
     userID = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', back_populates='watchers')
 
-    def __repr__(self): return "{} [{}], {} ({})".format(
-        self.game, self.state, self.user, self.config)
+    def __repr__(self): return "{} {} ({})".format(
+        self.game, self.user, self.config)
 
 
 class WatcherConfig(db.Model):
