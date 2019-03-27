@@ -4,7 +4,7 @@ from flask import Flask
 from flask_user import UserManager, SQLAlchemyAdapter
 from flask_testing import TestCase
 
-from lamon import db
+from lamon import db, create_app
 from lamon.models import User, Role, Nickname, Game, Watcher
 
 
@@ -13,42 +13,11 @@ class BaseTestCase(TestCase):
 
     def create_app(self):
         """ Create the app used for testing """
-        app = Flask(__name__)
+        app = create_app('../tests/config.py')
 
-        # Testing config
-        # TODO Move to config file
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-        app.config['HASH_ROUNDS'] = 1
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['SECRET_KEY'] = 'secret'
-
-        db.init_app(app)
         with app.app_context():
             db.drop_all()
             db.create_all()
-
-        # User Manager
-        from lamon.models import User
-        db_adapter = SQLAlchemyAdapter(db, User)
-        user_manager = UserManager(db_adapter, app)
-
-        # Admin views
-        from lamon.admin import register_admin
-        register_admin(app)
-
-        # Register blueprints
-        from lamon.views import register_blueprints
-        register_blueprints(app)
-
-        # Register cli commands
-        from lamon.cmd import register_cmds
-        register_cmds(app)
-
-        # Start Watchers
-        from lamon.watcher.manager import WatcherManager
-        watcher_manager = WatcherManager(app, db)
 
         return app
 

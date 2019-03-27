@@ -9,13 +9,12 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 
-def create_app():
+def create_app(config_file='../config.py'):
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/lamon'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'secret'
-    app.config['USER_ENABLE_EMAIL'] = False
     app.config['LOGGER_NAME'] = __name__
+    app.config['USER_ENABLE_EMAIL'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.from_pyfile(config_file)
 
     # Database
     db.init_app(app)

@@ -91,3 +91,6 @@ ENV/
 
 # Database migrations
 migrations
+
+# Testing database
+test/test.db
