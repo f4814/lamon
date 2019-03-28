@@ -119,7 +119,7 @@ class Watcher(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     threadClass = db.Column(db.String)
-    config = db.relationship('WatcherConfig')
+    config = db.relationship('WatcherConfig', back_populates='watcher')
 
     # Gamewatcher
     gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
@@ -137,7 +137,10 @@ class WatcherConfig(db.Model):
     __tablename__ = 'watcherconfig'
 
     id = db.Column(db.Integer, primary_key=True)
+
     watcherID = db.Column(db.Integer, db.ForeignKey('watchers.id'))
+    watcher = db.relationship('Watcher', back_populates='config')
+
     key = db.Column(db.String)
     value = db.Column(db.String)
 
