@@ -14,6 +14,7 @@ class BaseTestCase(TestCase):
     def create_app(self):
         """ Create the app used for testing """
         app = create_app('../tests/config.py')
+        app.logger.level = 100
 
         with app.app_context():
             db.drop_all()
