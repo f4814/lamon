@@ -32,7 +32,9 @@ class WatcherView(AuthModelView):
     form_choices = {
         'threadClass': [
             ('lamon.watcher.game.source_engine.SourceEngineWatcher',
-                'Source Engine Watcher')
+                'Source Engine Watcher'),
+            ('tests.test_watcher.fake.FakeWatcher',
+                'Fake Watcher')
         ]
     }
 
@@ -62,7 +64,7 @@ class WatcherView(AuthModelView):
 
 
 def register_admin(app):
-    admin = Admin(app, name='lamon')
+    admin = Admin(app, name='lamon', base_template='base.html')
 
     admin.add_view(UserView(User, db.session))
     admin.add_view(GameView(Game, db.session))

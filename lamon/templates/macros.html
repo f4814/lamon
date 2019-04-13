@@ -1,0 +1,46 @@
+{% macro active(page) %}
+    {% if page == request.endpoint %} active {% endif %}
+{% endmacro %}
+
+{# FIXME #}
+{% macro active_subsite(page) %}
+    {% if page in request.endpoint %} active {% endif %}
+{% endmacro %}
+
+{% macro render_nav_dropdown(head, dropdowns) %}
+    {% set dropdown = head[1] + '-dropdown' %}
+    <li class="nav-item dropdown {{ active_subsite(head[1]) }}">
+        <a class="nav-link dropdown-toggle" href="{{ url_for(head[1]) }}" id="{{ dropdown }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ head[0] }}
+        </a>
+
+        <div class="dropdown-menu" aria-labelledby="{{ dropdown }}">
+            {% for i in dropdowns %}
+                <a class="dropdown-item {{ active(i[1]) }}" href="{{ url_for(i[1]) }}">
+                    {{ i[0] }}
+                </a>
+            {% endfor %}
+        </div> <!-- /.dropdown-menu -->
+    </li> <!-- /.nav-item -->
+{% endmacro %}
+
+{% macro render_nav_item(title, url) %}
+    <li class="nav-item {{ active(url) }}">
+        <a class="nav-link" href="{{ url_for(url) }}">{{ title }}</a>
+    </li>
+{% endmacro %}
+
+{% macro render_alerts() %}
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endmacro %}

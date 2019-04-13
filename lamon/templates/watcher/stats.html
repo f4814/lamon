@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Gamewatcher Stats{% endblock %}
+{% block title %}Watcher Stats{% endblock %}
 
 {% block content %}
+    {% for watcher in watchers %}
+        <div class="row">
+            <div class="col">
+                <a href="{{ url_for('watchers.stats', watcher_id=watcher.id) }}">
+                    {{ watcher }}
+                </a>
+            </div>
+            <div class="col">
+                INFO
+            </div>
+        </div>
+    {% endfor %}
 {% endblock %}

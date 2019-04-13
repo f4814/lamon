@@ -1,31 +1,87 @@
-<!DOCTYPE html>
+{% from 'macros.html' import render_nav_dropdown, render_nav_item, render_alerts, active %}
 
-<html>
+<!doctype html>
+<html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+        <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
+
         {% block head %}
         <title>{% block title %}{% endblock %} - Lamon</title>
         {% endblock %}
     </head>
 
     <body>
-        {% block body %}
-        <div id="header">
-            <a href="{{ url_for('main.index') }}">Home</a>
-            <a href="{{ url_for('games.index') }}">Games</a>
-            <a href="{{ url_for('watchers.index') }}">Watchers</a>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('user.profile') }}">Profile</a>
-                <a href="{{ url_for('user.logout') }}">Logout</a>
-            {% else %}
-                <a href="{{ url_for('user.login') }}">Login</a>
-            {% endif %}
-        </div>
-        <div id="content">{% block content %}{% endblock %}</div>
-        <div id="footer">
-            {% block footer %}
-            &copy; Copyright by me
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+            <a class="navbar-brand" href="#">Lamon</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="main-navbar">
+                <ul class="navbar-nav mr-auto">
+                    {{ render_nav_item('Home', 'main.index') }}
+                    {{ render_nav_dropdown(('Games', 'games.index'),
+                        [('Stats', 'games.stats')])
+                    }}
+                    {{ render_nav_dropdown(('Watchers', 'watchers.index'),
+                        [('Control', 'watchers.control'),
+                         ('Stats', 'watchers.stats')])
+                    }}
+                    {{ render_nav_dropdown(('Admin', 'admin.index'),
+                        [('User', 'user.index_view'),
+                        ('Game', 'game.index_view'),
+                        ('Watcher', 'watcher.index_view')])
+                    }}
+                    {{ render_nav_dropdown(('Users', 'users.index'),
+                        [('Stats', 'users.stats')])
+                    }}
+                </ul><!-- /.navbar-nav -->
+                <ul class="navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                    {{ render_nav_item('Profile', 'user.profile') }}
+                    {{ render_nav_item('Log out', 'user.logout') }}
+                    {% else %}
+                    {{ render_nav_item('Log in', 'user.login') }}
+                    {% endif %}
+                </ul><!-- /.navbar-right -->
+            </div><!-- /.navbar-collapse -->
+        </nav>
+
+        <noscript>
+            {% block noscript %}
+                <div class="alert alert-danger">
+                    Javascript is not enabled in your browser. The site should be
+                    usable, but some UI elements might not work!
+                </div>
             {% endblock %}
-        </div>
-        {% endblock %}
+        </noscript>
+
+        <main role="main" class="container">
+            {{ render_alerts() }}
+            <div class="content-wrapper">
+                {% block content %}{% endblock %}
+                {% block body %}{% endblock %}
+            </div>
+        </main><!-- /.container -->
+
+        <footer class="footer">
+            <div class="container">
+                {% block footer %}
+                &copy; Copyright f4814n
+                {% endblock %}
+            </div>
+        </footer>
+
+
+        <!-- Bootstrap core JavaScript -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
     </body>
 </html>
+

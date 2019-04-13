@@ -3,4 +3,16 @@
 {% block title %}Game Stats{% endblock %}
 
 {% block content %}
+    {% for game in games %}
+        <div class="row">
+            <div class="col">
+                <a href="{{ url_for('games.stats', game_id=game.id) }}">
+                    {{ game.name }}
+                </a>
+            </div>
+            <div class="col">
+                INFO
+            </div>
+        </div>
+    {% endfor %}
 {% endblock %}
