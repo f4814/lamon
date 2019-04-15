@@ -41,7 +41,8 @@ class TestWatcher(BaseTestCase):
         session = scoped_session(sessionmaker(bind=db.engine))
 
         self.watcher = FakeWatcher(
-            session=session, model_id=self.watcher_model.id)
+            session=session, model_id=self.watcher_model.id,
+            config_keys=['key1', 'key2', 'key3'])
 
     def tearDown(self):
         """ Kill fake watcher """
@@ -83,6 +84,17 @@ class TestWatcher(BaseTestCase):
 
     def test_reload(self):
         """ Test reloading mechanism """
+        self.watcher.start()
+
+        for i in self.watcher_model.config:
+            i.value = "updated"
+
+        db.session.commit()
+
+        self.watcher.reload()
+
+        for key, value in self.watcher.config.items():
+            self.assertTrue(value == "updated")
 
     def test_add_score(self):
         """ Test score adding """

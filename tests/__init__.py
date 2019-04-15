@@ -5,7 +5,7 @@ from flask_user import UserManager, SQLAlchemyAdapter
 from flask_testing import TestCase
 
 from lamon import db, create_app
-from lamon.models import User, Role, Nickname, Game, Watcher
+from lamon.models import User, Role, Nickname, Game, Watcher, WatcherConfig
 
 
 class BaseTestCase(TestCase):
@@ -60,6 +60,9 @@ class BaseTestCase(TestCase):
 
         watcher = Watcher(
             threadClass='tests.test_watcher.fake.FakeWatcher')
+        watcher.config.append(WatcherConfig(key='key1', value='value1'))
+        watcher.config.append(WatcherConfig(key='key2', value='value2'))
+        watcher.config.append(WatcherConfig(key='key3', value='value3'))
         db.session.add(watcher)
 
         db.session.commit()
