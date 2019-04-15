@@ -100,6 +100,8 @@ class Watcher(ABC, Thread):
             except NoResultFound:
                 self.logger.warning("No config w/ key found: {}".format(k))
 
+        self.logger.info("Reloaded Watcher (id={})".format(self._model.id))
+
     def add_score(self, nickname, points):
         """ Add a score to the database.
 
