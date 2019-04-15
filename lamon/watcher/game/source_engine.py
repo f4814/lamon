@@ -1,10 +1,9 @@
 from valve.source.a2s import ServerQuerier, NoResponseError
 
-from . import GameWatcher
-from .. import WatcherException
+from .. import Watcher, WatcherException
 
 
-class SourceEngineWatcher(GameWatcher):
+class SourceEngineWatcher(Watcher):
     """Watcher implementating communication to games based on Valve's source
     engine
     """
