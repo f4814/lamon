@@ -64,7 +64,7 @@ class WatcherView(AuthModelView):
 
 
 def register_admin(app):
-    admin = Admin(app, name='lamon', base_template='base.html')
+    admin = Admin(app, name='lamon', template_mode='bootstrap3')
 
     admin.add_view(UserView(User, db.session))
     admin.add_view(GameView(Game, db.session))
