@@ -37,8 +37,6 @@ class Watcher(ABC, Thread):
 
         # Setup logger
         self.logger = getLogger(logName)
-        self.logger.setLevel(10)
-        self.logger.addHandler(StreamHandler(sys.stdout))
 
         # Load Model
         self._model = self._session.query(WatcherModel).\
@@ -61,9 +59,10 @@ class Watcher(ABC, Thread):
         super().__init__(name='Watcher-{}'.format(self._model.id))
 
     def run(self):
-        """ Runs Watcher.runner in a new thread. Errors are logged. """
+        """ Runs Watcher.runner in a new thread."""
         self.reload()
 
+        # Load Model into new thread
         self._session.add(self._model)
         self._session.commit()
 
@@ -87,7 +86,8 @@ class Watcher(ABC, Thread):
         """ Reload all config keys (specified in Watcher.config_keys)
 
         This function can be overwritten if typecasting of the config values
-        is required. See :class:`SourceEngineWatcher` for an example"""
+        is required. See :class:`SourceEngineWatcher` for an example
+        """
         self._model = self._session.query(WatcherModel).\
             filter(WatcherModel.id == self._model.id).one()
 
@@ -97,6 +97,7 @@ class Watcher(ABC, Thread):
                 filter(WatcherConfig.key == k)
             try:
                 self.config[k] = query.one().value
+                self.logger.debug("Reload: {} = {}".format(k, self.config[k]))
             except NoResultFound:
                 self.logger.warning("No config w/ key found: {}".format(k))
 
@@ -111,6 +112,7 @@ class Watcher(ABC, Thread):
         :type points: int
         :param points: Points to be added to the players score
         """
+        self.logger.debug("Adding {} points to {}".format(points, nickname))
         query = self._session.query(Nickname).\
             filter(Nickname.nick == nickname).\
             filter(Nickname.gameID == self._model.gameID)
@@ -129,6 +131,7 @@ class Watcher(ABC, Thread):
 
     def stop(self):
         """ Stops the watcher """
+        self.logger.info("Stopping watcher")
         self.shutdown = False
 
         self.join()

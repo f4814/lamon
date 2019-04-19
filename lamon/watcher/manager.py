@@ -1,3 +1,5 @@
+import logging
+
 from flask import current_app
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -19,6 +21,8 @@ class WatcherManager():
 
         if app:
             self.init_app(app, db)
+        else:
+            self.logger = logging.getLogger('lamon.watcher.manager')
 
     def init_app(self, app, db):
         """ Attach to application
@@ -28,6 +32,7 @@ class WatcherManager():
         """
         app.watcher_manager = self
         self.db = db
+        self.logger = app.logger.getChild('WatcherManager')
 
     def start(self, id=None, model=None):
         """ Start a watcher.
@@ -44,20 +49,18 @@ class WatcherManager():
         :raises TypeError: When threadClass of watcher model is no subclass of
             Watcher
         """
-        app = current_app
-
         if id is not None:
             model = WatcherModel.query.filter(WatcherModel.id == id).one()
         elif model is not None:
             id = model.id
 
         if id in self._watchers:
-            app.logger.warning(
+            self.logger.warning(
                 "Cannot start already running watcher: {}".format(model))
             raise ValueError(
                 "Cannot start watcher (id={}). Already running.".format(id))
 
-        app.logger.info("Starting gamewatcher: {}".format(model))
+        self.logger.info("Starting gamewatcher: {}".format(model))
 
         # Create db session not connected to flask
         session = scoped_session(sessionmaker(bind=self.db.engine))
@@ -81,8 +84,6 @@ class WatcherManager():
 
         :raises ValueError: When watcher is not running
         """
-        app = current_app
-
         if id is not None:
             model = WatcherModel.query.filter(WatcherModel.id == id).one()
         elif model is not None:
@@ -91,7 +92,7 @@ class WatcherManager():
         if id in self._watchers:
             self._watchers[id].reload()
         else:
-            app.logger.warning("Cannot reload watcher: {}".format(model))
+            self.logger.warning("Cannot reload watcher: {}".format(model))
             raise ValueError(
                 "Cannot reload watcher (id={}). Not running".format(id))
 
@@ -108,19 +109,17 @@ class WatcherManager():
 
         :raises ValueEror: When watcher is not running
         """
-        app = current_app
-
         if id is not None:
             model = WatcherModel.query.filter(WatcherModel.id == id).one()
         elif model is not None:
             id = model.id
 
         if id in self._watchers:
-            app.logger.info("Stopping watcher: {}".format(model))
+            self.logger.info("Stopping watcher: {}".format(model))
             self._watchers[id].stop()
             self._watchers.pop(id)
         else:
-            app.logger.warning("Watcher thread not found: {}".format(model))
+            self.logger.warning("Watcher thread not found: {}".format(model))
             raise ValueError(
                 "Cannot stop watcher (id={}). Not running".format(id))
 
@@ -137,8 +136,6 @@ class WatcherManager():
 
         :returns: :class:`bool`
         """
-        app = current_app
-
         if id is None:
             id = model.id
 

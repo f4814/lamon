@@ -1,4 +1,7 @@
+import logging
+
 from flask import Flask
+from flask.logging import default_handler
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserManager, SQLAlchemyAdapter
@@ -15,6 +18,9 @@ def create_app(config_file='../config.py'):
     app.config['USER_ENABLE_EMAIL'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_pyfile(config_file)
+
+    # Configure logging
+    logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
     # Database
     db.init_app(app)
