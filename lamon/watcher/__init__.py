@@ -30,17 +30,17 @@ class Watcher(ABC, Thread):
         not fit the object
     """
 
-    def __init__(self, logName, **kwargs):
+    def __init__(self, logName, config_keys=[], session=None, model_id=None):
         # Get Kwargs
-        self.config_keys = kwargs['config_keys']
-        self._session = kwargs['session']
+        self.config_keys = config_keys
+        self._session = session
 
         # Setup logger
         self.logger = getLogger(logName)
 
         # Load Model
         self._model = self._session.query(WatcherModel).\
-            filter(WatcherModel.id == kwargs['model_id']).one()
+            filter(WatcherModel.id == model_id).one()
 
         # Check for correct model
         qualname = type(self).__module__ + "." + type(self).__name__
