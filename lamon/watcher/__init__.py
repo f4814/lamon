@@ -26,21 +26,20 @@ class Watcher(ABC, Thread):
     :param session: SQLAlchemy session to access the database. You probably
         want a scoped_session
 
+    :type model_id: :class:`int`
+    :param model_id: The database id (primary key) of the model.
+
     :raises TypeError: When initialized with a model whose threadClass does
         not fit the object
     """
 
     def __init__(self, logName, config_keys=[], session=None, model_id=None):
-        # Get Kwargs
         self.config_keys = config_keys
         self._session = session
+        self._model_id = model_id
 
         # Setup logger
         self.logger = getLogger(logName)
-
-        # Load Model
-        self._model = self._session.query(WatcherModel).\
-            filter(WatcherModel.id == model_id).one()
 
         # Check for correct model
         qualname = type(self).__module__ + "." + type(self).__name__
@@ -62,14 +61,13 @@ class Watcher(ABC, Thread):
         """ Runs Watcher.runner in a new thread."""
         self.reload()
 
-        # Load Model into new thread
-        self._session.add(self._model)
-        self._session.commit()
-
         try:
             self.runner()
         except Exception as e:
             self.logger.exception(e)
+
+        self._session.commit()
+        self._session.close()
 
     @abstractmethod
     def runner(self):
@@ -82,18 +80,24 @@ class Watcher(ABC, Thread):
         Errors indicating a connection problem should not crash this function.
         """
 
+    @property
+    def _model(self):
+        """ Since some database systems don't like multithreaded access
+        this reloads the model at every access.
+        """
+        query = self._session.query(WatcherModel).\
+            filter(WatcherModel.id == self._model_id)
+        return query.one()
+
     def reload(self):
         """ Reload all config keys (specified in Watcher.config_keys)
 
         This function can be overwritten if typecasting of the config values
         is required. See :class:`SourceEngineWatcher` for an example
         """
-        self._model = self._session.query(WatcherModel).\
-            filter(WatcherModel.id == self._model.id).one()
-
         for k in self.config_keys:
             query = self._session.query(WatcherConfig).\
-                filter(WatcherConfig.watcherID == self._model.id).\
+                filter(WatcherConfig.watcherID == self._model_id).\
                 filter(WatcherConfig.key == k)
             try:
                 self.config[k] = query.one().value
@@ -135,9 +139,11 @@ class Watcher(ABC, Thread):
         self.shutdown = False
 
         self.join()
+        self.logger.debug("Watcher thread stopped")
 
         self._session.commit()
         self._session.close()
+        self.logger.debug("DB session closed")
 
     def __repr__(self):
         return str(self._model)
