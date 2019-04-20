@@ -1,6 +1,7 @@
 from valve.source.a2s import ServerQuerier, NoResponseError
 
 from .. import Watcher, WatcherException
+from lamon.models import Event, EventType
 
 
 class SourceEngineWatcher(Watcher):
@@ -30,7 +31,9 @@ class SourceEngineWatcher(Watcher):
             if not p['name']:  # Valve doc mentions possible empty players
                 continue
 
-            self.add_score(p['name'], p['score'])
+            user = self.get_user(p['name'])
+            self.add_event(Event(type=EventType.SCORE, userID=user.id,
+                                 info=str(p['score'])))
 
     def reload(self):
         super().reload()

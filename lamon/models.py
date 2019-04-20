@@ -1,11 +1,20 @@
 from flask_user import UserMixin
 from sqlalchemy import DateTime
 from datetime import datetime
+from enum import IntEnum, unique, auto
 
 from lamon import db
 
 
 class User(db.Model, UserMixin):
+    """ A User
+
+    :param username: Username to authenticate with lamon
+    :param password: Hashed password
+    :param nicknames: :class:`Nickname` s of the User
+    :param events: Events concerning the user (like scores, joins, etc.)
+    :param roles: System roles of the user
+    """
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -14,8 +23,7 @@ class User(db.Model, UserMixin):
     is_enabled = True
 
     nicknames = db.relationship('Nickname', back_populates='user')
-    watchers = db.relationship('Watcher', back_populates='user')
-    scores = db.relationship('Score', back_populates='user')
+    events = db.relationship('Event', back_populates='user')
     roles = db.relationship('Role', secondary='user_roles',
                             backref=db.backref('users', lazy='dynamic'))
 
@@ -23,7 +31,86 @@ class User(db.Model, UserMixin):
         return self.username
 
 
+class Event(db.Model):
+    """ Events are used log keep a log of things happening. This includes events
+    on watched servers (scores, kills), server events (unavailable) and
+    watcher events (restarted, started, stopped).
+
+    :param type: An :class:`EventType` specifies how to handle this event
+    :param time: Time the event occurred
+    :param info: Additional info. Changes with :attr:`type`
+    :param watcher: Watcher the event occurred in (If any)
+    :param game: Game the event occured in (If any)
+    :param user: User connected to the event (If any)
+    """
+    __tablename__ = 'events'
+
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.Integer)
+    time = db.Column(DateTime())
+    info = db.Column(db.String)
+
+    watcherID = db.Column(db.Integer, db.ForeignKey('watchers.id'))
+    watcher = db.relationship('Watcher', back_populates='events')
+
+    gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
+    game = db.relationship('Game', back_populates='events')
+
+    userID = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', back_populates='events')
+
+    def __init__(self, type=None, **kwargs):
+        super().__init__(type=int(type), **kwargs)
+
+
+class Game(db.Model):
+    """ A game or gamemode played by the users
+
+    :param name: Name of the game, can be anything
+    :param nicknames: Nicknames registered for this game
+    :param events: Events in the Game
+    :param watchers: Watchers watching the game
+    """
+    __tablename__ = 'games'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
+    nicknames = db.relationship('Nickname', back_populates='game')
+    events = db.relationship('Event', back_populates='game')
+    watchers = db.relationship('Watcher', back_populates='game')
+
+    def __repr__(self):
+        return self.name
+
+
+class Watcher(db.Model):
+    """ A Watcher is a process keeping track of one or more gameservers
+
+    :param threadClass: Implementation of the process
+    :param config: Configuration values the process needs (like server ip)
+    :param events: Events occured in the watcher
+    :param game: Game watched by the watcher
+    """
+    __tablename__ = 'watchers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    threadClass = db.Column(db.String)
+    config = db.relationship('WatcherConfig', back_populates='watcher')
+
+    events = db.relationship('Event', back_populates='watcher')
+
+    gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
+    game = db.relationship('Game', back_populates='watchers')
+
+    def __repr__(self): return "{} ({})".format(
+        self.game, self.config)
+
+
 class Role(db.Model):
+    """ A user role on the system
+
+    :param name: Name of the role
+    """
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -34,6 +121,7 @@ class Role(db.Model):
 
 
 class UserRoles(db.Model):
+    """ Many-to-many mapper between :class:`User` and :class:`Role` """
     __tabelname__ = 'user_roles'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -44,6 +132,12 @@ class UserRoles(db.Model):
 
 
 class Nickname(db.Model):
+    """ The nickname of a user in a game
+
+    :param nick: Nickname
+    :param user: Associated user
+    :param game: Associated game
+    """
     __tablename__ = 'nicknames'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -62,78 +156,13 @@ class Nickname(db.Model):
         return r.format(self.user, self.nick, self.game)
 
 
-class Score(db.Model):
-    __tablename__ = 'scores'
-
-    id = db.Column(db.Integer, primary_key=True)
-    points = db.Column(db.Integer)
-    time = db.Column(DateTime())
-
-    userID = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', back_populates='scores')
-
-    nicknameID = db.Column(db.Integer, db.ForeignKey('nicknames.id'))
-
-    gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
-    game = db.relationship('Game', back_populates='scores')
-
-    def __init__(self, points, time=None, game=None, user=None, nick=None):
-        self.points = points
-
-        if time:
-            self.time = time
-        else:
-            self.time = datetime.Now()
-
-        if game:
-            self.game = game
-            self.gameID = game.id
-
-        if user:
-            self.user = user
-            self.userID = user.id
-
-        if nick:
-            self.nicknameID = nick.id
-
-    def __repr__(self):
-        r = "{} points at {} in {}"
-        return r.format(self.points, self.time, self.game)
-
-
-class Game(db.Model):
-    __tablename__ = 'games'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True)
-    scores = db.relationship('Score', back_populates='game')
-    nicknames = db.relationship('Nickname', back_populates='game')
-    watchers = db.relationship('Watcher', back_populates='game')
-
-    def __repr__(self):
-        return self.name
-
-
-class Watcher(db.Model):
-    __tablename__ = 'watchers'
-
-    id = db.Column(db.Integer, primary_key=True)
-    threadClass = db.Column(db.String)
-    config = db.relationship('WatcherConfig', back_populates='watcher')
-
-    # Gamewatcher
-    gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
-    game = db.relationship('Game', back_populates='watchers')
-
-    # Userwatcher
-    userID = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', back_populates='watchers')
-
-    def __repr__(self): return "{} {} ({})".format(
-        self.game, self.user, self.config)
-
-
 class WatcherConfig(db.Model):
+    """ A key value pair in a :class:`Watcher` configuration
+
+    :param watcher: Associated watcher
+    :param key: Key
+    :param value: Value
+    """
     __tablename__ = 'watcherconfig'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -146,3 +175,19 @@ class WatcherConfig(db.Model):
 
     def __repr__(self):
         return self.key + ": " + self.value
+
+
+@unique
+class EventType(IntEnum):
+    """ A Type of event used in :attr:`~Event.type`
+
+    :param CONNECT:
+    :param DISCONNECT:
+    :param JOIN:
+    :param LEAVE:
+    :param SCORE:
+    """
+    RELOAD = auto()
+    SCORE = auto()
+    JOIN = auto()
+    LEAVE = auto()

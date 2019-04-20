@@ -7,3 +7,4 @@ API
 
     watcher.rst
     watcher_manager.rst
+    models.rst

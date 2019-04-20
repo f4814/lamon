@@ -2,7 +2,7 @@ import click
 from flask import current_app
 from flask.cli import AppGroup
 
-from lamon.models import User, Role, Game, Score
+from lamon.models import User, Role, Game
 from lamon import db
 
 user_cli = AppGroup('user')
@@ -64,16 +64,3 @@ def remove_role_user(name, role):
     user.roles.remove(role)
     db.session.commit()
 
-@user_cli.command('add_score')
-@click.argument('name')
-@click.argument('game')
-@click.argument('points')
-def add_score_user(name, game, points):
-    queryUser = db.session.query(User).filter(User.username == name)
-    queryGame = db.session.query(Game).filter(Game.name == game)
-
-    user = queryUser.one()
-    game = queryGame.one()
-
-    user.scores.append(Score(points=points, game=game))
-    db.session.commit()

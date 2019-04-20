@@ -5,10 +5,11 @@ from threading import Thread
 from importlib import import_module
 from logging import getLogger, StreamHandler
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from datetime import datetime
 
 from lamon import db
 from ..models import Watcher as WatcherModel
-from ..models import Nickname, Score, WatcherConfig
+from ..models import Nickname, Event, WatcherConfig, EventType
 
 
 class Watcher(ABC, Thread):
@@ -59,6 +60,10 @@ class Watcher(ABC, Thread):
 
     def run(self):
         """ Runs Watcher.runner in a new thread."""
+        # Log start
+        self.logger.info('Started watcher (id={})'.format(self._model_id))
+        self.add_event(Event(type=EventType.JOIN))
+
         self.reload()
 
         try:
@@ -106,32 +111,36 @@ class Watcher(ABC, Thread):
                 self.logger.warning("No config w/ key found: {}".format(k))
 
         self.logger.info("Reloaded Watcher (id={})".format(self._model.id))
+        self.add_event(Event(type=EventType.RELOAD))
 
-    def add_score(self, nickname, points):
-        """ Add a score to the database.
+    def add_event(self, event):
+        """ Add a event to the database
+
+        :type event: lamon.models.Event
+        :param event: Event to add to the database. event.watcherID and
+            event.time are set by this function
+        """
+        self.logger.info(str(event))
+
+        event.watcherID = self._model_id
+
+        if event.time is None:
+            event.time = datetime.now()
+
+        self._session.add(event)
+        self._session.commit()
+
+    def get_user(self, nickname):
+        """ Get the :class:`lamon.models.User` with the associated Nickname
 
         :type nickname: str
-        :param nickname: Nickname of the player
-
-        :type points: int
-        :param points: Points to be added to the players score
+        :param nickname: Nickname
         """
-        self.logger.debug("Adding {} points to {}".format(points, nickname))
-        query = self._session.query(Nickname).\
-            filter(Nickname.nick == nickname).\
-            filter(Nickname.gameID == self._model.gameID)
+        query = self._session.query(User).join(Nickname).\
+            filter(User.nickname == nickname).\
+            filter(Nickname.gameID == self._model.game.id)
 
-        try:
-            nickModel = query.One()
-        except NoResultFound:
-            self.logger.warning("Unknown nickname: {}".format(nickname))
-            return
-
-        score = Score(points, game=self._model.game,
-                      user=nickModel.user, nick=nickModel)
-
-        self._session.add(score)
-        self._session.commit()
+        return query.one()
 
     def stop(self):
         """ Stops the watcher """
@@ -140,6 +149,8 @@ class Watcher(ABC, Thread):
 
         self.join()
         self.logger.debug("Watcher thread stopped")
+
+        self.add_event(Event(type=EventType.LEAVE))
 
         self._session.commit()
         self._session.close()

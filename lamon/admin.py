@@ -50,7 +50,6 @@ class WatcherView(AuthModelView):
         """ The create form should only select the threadClass of the watcher """
         form = super().create_form(obj)
         del form.game
-        del form.user
         del form.config
         return form
 
