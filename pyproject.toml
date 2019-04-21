@@ -8,14 +8,14 @@ authors = ["Fabian Geiselhart <me@f4814n.de>"]
 python = "^3.7"
 flask = "^1.0"
 jinja2 = "^2.10"
-python-valve = "^0.2.1"
 sqlalchemy = "^1.2"
 flask-sqlalchemy = "^2.3"
 Flask-Migrate = "^2.3"
 flask-user = "=0.6.21"
-psycopg2 = "^2.7"
 flask-admin = "^1.5"
 flask-wtf = "^0.14.2"
+psycopg2 = {version = "^2.8",optional = true}
+python-valve = {version = "^0.2.1",optional = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
