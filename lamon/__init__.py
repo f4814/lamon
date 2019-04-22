@@ -65,8 +65,6 @@ def load_config_file(config_file):
         }
     }
 
-    print(toml.dumps(default_config))
-
     config = dictDefault(toml.load(config_file), default_config)
 
     config['flask'] = {}
