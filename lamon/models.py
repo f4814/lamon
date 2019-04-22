@@ -62,6 +62,20 @@ class Event(db.Model):
     def __init__(self, type=None, **kwargs):
         super().__init__(type=int(type), **kwargs)
 
+    def __str__(self):
+        msg = str(EventType(self.type)) + ": "
+
+        if self.watcherID is not None:
+            msg += "Watcher = {}; ".format(str(self.watcher))
+
+        if self.gameID is not None:
+            msg += "Game = {}; ".format(str(self.game))
+
+        if self.userID is not None:
+            msg += "Gmae = {}; ".format(str(self.game))
+
+        return msg
+
 
 class Game(db.Model):
     """ A game or gamemode played by the users

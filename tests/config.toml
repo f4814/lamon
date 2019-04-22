@@ -1,0 +1,15 @@
+[database]
+database_uri = 'sqlite:///test.db'
+secret_key = 'secret'
+
+[app]
+testing = true
+wtr_csrf_enabled = false
+hash_rounds = 1
+
+[logging]
+    [logging.root]
+    handlers = ['noop']
+
+    [logging.handlers.noop]
+    class = 'logging.NullHandler'

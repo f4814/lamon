@@ -22,7 +22,7 @@ class WatcherManager():
         if app:
             self.init_app(app, db)
         else:
-            self.logger = logging.getLogger('lamon.watcher.manager')
+            self.logger = logging.getLogger('lamon.watcher_manager')
 
     def init_app(self, app, db):
         """ Attach to application
@@ -32,7 +32,7 @@ class WatcherManager():
         """
         app.watcher_manager = self
         self.db = db
-        self.logger = app.logger.getChild('WatcherManager')
+        self.logger = app.logger.getChild('watcher_manager')
 
     def start(self, id=None, model=None):
         """ Start a watcher.

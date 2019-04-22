@@ -53,7 +53,10 @@ class Watcher(ABC, Thread):
         self.config = {}
         for k in self.config_keys:
             self.config[k] = None
+
+        self.logger.propagate = False
         self.reload()
+        self.logger.propagate = True
 
         # Initialize threading.Thread
         super().__init__(name='Watcher-{}'.format(self._model.id))
@@ -63,8 +66,6 @@ class Watcher(ABC, Thread):
         # Log start
         self.logger.info('Started watcher (id={})'.format(self._model_id))
         self.add_event(Event(type=EventType.JOIN))
-
-        self.reload()
 
         try:
             self.runner()
@@ -120,8 +121,6 @@ class Watcher(ABC, Thread):
         :param event: Event to add to the database. event.watcherID and
             event.time are set by this function
         """
-        self.logger.info(str(event))
-
         event.watcherID = self._model_id
 
         if event.time is None:
@@ -129,6 +128,8 @@ class Watcher(ABC, Thread):
 
         self._session.add(event)
         self._session.commit()
+
+        self.logger.debug(str(event))
 
     def get_user(self, nickname):
         """ Get the :class:`lamon.models.User` with the associated Nickname

@@ -1,0 +1,9 @@
+[app]
+
+[database]
+database_uri = 'postgresql://postgres:123@localhost/lamon'
+secret_key = 'secret'
+
+[watcher]
+
+[logging]

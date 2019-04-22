@@ -1,5 +1,6 @@
 import threading
 import logging
+import os
 
 from flask import Flask
 from flask_user import UserManager, SQLAlchemyAdapter
@@ -14,8 +15,7 @@ class BaseTestCase(TestCase):
 
     def create_app(self):
         """ Create the app used for testing """
-        logging.disable(logging.CRITICAL)
-        app = create_app('../tests/config.py')
+        app = create_app('tests/config.toml')
 
         with app.app_context():
             db.drop_all()
