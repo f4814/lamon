@@ -68,7 +68,7 @@ class TestWatcher(BaseTestCase):
         """ Test starting watcher thread """
         query = db.session.query(Event).\
             filter(Event.watcherID == self.watcher._model_id).\
-            filter(Event.type == int(EventType.JOIN))
+            filter(Event.type == int(EventType.WATCHER_START))
         before = len(query.all())
 
         self.watcher.start()
@@ -88,7 +88,7 @@ class TestWatcher(BaseTestCase):
         """ Test stopping watcher thread """
         query = db.session.query(Event).\
             filter(Event.watcherID == self.watcher._model_id).\
-            filter(Event.type == int(EventType.LEAVE))
+            filter(Event.type == int(EventType.WATCHER_STOP))
 
         self.watcher.start()
 
@@ -107,7 +107,7 @@ class TestWatcher(BaseTestCase):
         """ Test reloading mechanism """
         query = db.session.query(Event).\
             filter(Event.watcherID == self.watcher._model_id).\
-            filter(Event.type == int(EventType.RELOAD))
+            filter(Event.type == int(EventType.WATCHER_RELOAD))
 
         self.watcher.start()
         time.sleep(1) # Wait for watcher to finish
@@ -128,7 +128,7 @@ class TestWatcher(BaseTestCase):
 
     def test_add_event(self):
         """ Test event adding """
-        e = Event(type=1, time=datetime.now(), info='TEST')
+        e = Event(type=EventType.WATCHER_RELOAD, time=datetime.now(), info='TEST')
         self.watcher.add_event(e)
 
         query = db.session.query(Event).\

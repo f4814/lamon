@@ -195,13 +195,31 @@ class WatcherConfig(db.Model):
 class EventType(IntEnum):
     """ A Type of event used in :attr:`~Event.type`
 
-    :param CONNECT:
-    :param DISCONNECT:
-    :param JOIN:
-    :param LEAVE:
-    :param SCORE:
+    **Watcher related events**. :attr:`Event.watcherID` has to be set
+
+    :param WATCHER_RELOAD: Watcher reloaded it's config.
+    :param WATCHER_START: Watcher started
+    :param WATCHER_STOP: Watcher stopped
+    :param WATCHER_CONNECTION_LOST: Watcher lost connection
+    :param WATCHER_CONNECTION_REAQUIRED: Watcher got connection back
+
+    **User related events**. :attr:`Event.userID`, :attr:`Event.watcherID` and
+    :attr:`Event.gameID` have to be set.
+
+    :param USER_SCORE: User score. :attr:`Event.info` is the absolute score.
+    :param USER_JOIN: User joined a game.
+    :param USER_LEAVE: User left a game.
+    :param USER_DIE: User died in game
+    :param USER_RESPAWN: User respawned after death
     """
-    RELOAD = auto()
-    SCORE = auto()
-    JOIN = auto()
-    LEAVE = auto()
+    WATCHER_RELOAD = 1000
+    WATCHER_START = 1001
+    WATCHER_STOP = 1002
+    WATCHER_CONNECTION_LOST = 1003
+    WATCHER_CONNECTION_REAQUIRED = 1004
+
+    USER_SCORE = 2000
+    USER_JOIN = 2001
+    USER_LEAVE = 2002
+    USER_DIE = 2003
+    USER_RESPAWN = 2004

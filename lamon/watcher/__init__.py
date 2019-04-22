@@ -65,7 +65,7 @@ class Watcher(ABC, Thread):
         """ Runs Watcher.runner in a new thread."""
         # Log start
         self.logger.info('Started watcher (id={})'.format(self._model_id))
-        self.add_event(Event(type=EventType.JOIN))
+        self.add_event(Event(type=EventType.WATCHER_START))
 
         try:
             self.runner()
@@ -112,7 +112,25 @@ class Watcher(ABC, Thread):
                 self.logger.warning("No config w/ key found: {}".format(k))
 
         self.logger.info("Reloaded Watcher (id={})".format(self._model.id))
-        self.add_event(Event(type=EventType.RELOAD))
+        self.add_event(Event(type=EventType.WATCHER_RELOAD))
+
+    def add_score(self, nickname, score):
+        """ Add a score to the user.
+
+        This is a convenience function over :meth:`add_event`and
+        :meth:`get_user`
+
+        :type nickname: str
+        :param nickname: Nickname of the user
+
+        :type score: int or float
+        :param score: **Absolute** score of the user
+
+        :raises ValueError: When no user with the given nickname is found
+        """
+        user = self.get_user(nickname)
+        self.addEvent(Event(userID=user.id, gameID=self._model.gameID,
+                            type=EventType.USER_SCORE, info=str(score)))
 
     def add_event(self, event):
         """ Add a event to the database
@@ -136,12 +154,18 @@ class Watcher(ABC, Thread):
 
         :type nickname: str
         :param nickname: Nickname
+
+        :raises ValueError: When no user with the given nickname is found
         """
         query = self._session.query(User).join(Nickname).\
             filter(User.nickname == nickname).\
             filter(Nickname.gameID == self._model.game.id)
 
-        return query.one()
+        try:
+            return query.one()
+        except NoResultFound:
+            raise ValueError("No user with given nickname ({}) found".
+                             format(nickname))
 
     def stop(self):
         """ Stops the watcher """
@@ -151,7 +175,7 @@ class Watcher(ABC, Thread):
         self.join()
         self.logger.debug("Watcher thread stopped")
 
-        self.add_event(Event(type=EventType.LEAVE))
+        self.add_event(Event(type=EventType.WATCHER_STOP))
 
         self._session.commit()
         self._session.close()
