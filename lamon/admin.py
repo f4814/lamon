@@ -31,8 +31,10 @@ class WatcherView(AuthModelView):
     inline_models = [WatcherConfig, ]
     form_choices = {
         'threadClass': [
-            ('lamon.watcher.game.source_engine.SourceEngineWatcher',
+            ('lamon.watcher.plugins.source_engine.SourceEngineWatcher',
                 'Source Engine Watcher'),
+            ('lamon.watcher.plugins.quake3.Quake3Watcher',
+                'Quake3 Watcher'),
             ('tests.test_watcher.fake.FakeWatcher',
                 'Fake Watcher')
         ]

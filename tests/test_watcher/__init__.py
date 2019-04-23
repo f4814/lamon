@@ -5,7 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from datetime import datetime
 
 from lamon.watcher import load_watcher_class, Watcher
-from lamon.watcher.game.source_engine import SourceEngineWatcher
+from lamon.watcher.plugin.source_engine import SourceEngineWatcher
 from lamon.models import Watcher as WatcherModel
 from lamon.models import Event, EventType
 from lamon import db
@@ -20,7 +20,7 @@ class TestCreateObject(BaseTestCase):
     def test_create(self):
         """ Test creation of a simple watcher object (SourceEngine) """
         source_engine = load_watcher_class(
-            'lamon.watcher.game.source_engine.SourceEngineWatcher')
+            'lamon.watcher.plugin.source_engine.SourceEngineWatcher')
         self.assertTrue(source_engine == SourceEngineWatcher)
 
     def test_create_abc(self):
