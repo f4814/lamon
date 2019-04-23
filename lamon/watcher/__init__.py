@@ -9,7 +9,7 @@ from datetime import datetime
 
 from lamon import db
 from ..models import Watcher as WatcherModel
-from ..models import Nickname, Event, WatcherConfig, EventType
+from ..models import Nickname, Event, WatcherConfig, EventType, User
 
 
 class Watcher(ABC, Thread):
@@ -129,7 +129,7 @@ class Watcher(ABC, Thread):
         :raises ValueError: When no user with the given nickname is found
         """
         user = self.get_user(nickname)
-        self.addEvent(Event(userID=user.id, gameID=self._model.gameID,
+        self.add_event(Event(userID=user.id, gameID=self._model.gameID,
                             type=EventType.USER_SCORE, info=str(score)))
 
     def add_event(self, event):
@@ -158,7 +158,7 @@ class Watcher(ABC, Thread):
         :raises ValueError: When no user with the given nickname is found
         """
         query = self._session.query(User).join(Nickname).\
-            filter(User.nickname == nickname).\
+            filter(Nickname.nick == nickname).\
             filter(Nickname.gameID == self._model.game.id)
 
         try:
