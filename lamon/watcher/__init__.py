@@ -20,8 +20,9 @@ class Watcher(ABC, Thread):
     :param logName: Name of the logger used by the watcher.
         When extending using __name__ is a good idea
 
-    :type config_keys: :class:`list`
-    :param config_keys: Config keys the watcher is looking for in the database
+    :type config_keys: :class:`dict`
+    :attribute config_keys: Dict keys are config keys. Values is a dict
+        containing datatype (`type` key) and wether it is required (`required` key)
 
     :type session: :class:`sqlalchemy.orm.session.Session`
     :param session: SQLAlchemy session to access the database. You probably
@@ -33,11 +34,12 @@ class Watcher(ABC, Thread):
     :raises TypeError: When initialized with a model whose threadClass does
         not fit the object
     """
+    config_keys = {}
 
-    def __init__(self, logName, config_keys=[], session=None, model_id=None):
-        self.config_keys = config_keys
+    def __init__(self, logName, session=None, model_id=None):
         self._session = session
         self._model_id = model_id
+        self.config = {}
 
         # Setup logger
         self.logger = getLogger(logName)
@@ -48,11 +50,6 @@ class Watcher(ABC, Thread):
             raise TypeError("""Cannot initalize watcher of class {} with model
                             where threadClass == {}""".
                             format(qualname, self._model.threadClass))
-
-        # Load config
-        self.config = {}
-        for k in self.config_keys:
-            self.config[k] = None
 
         self.logger.propagate = False
         self.reload()
@@ -97,19 +94,21 @@ class Watcher(ABC, Thread):
 
     def reload(self):
         """ Reload all config keys (specified in Watcher.config_keys)
-
-        This function can be overwritten if typecasting of the config values
-        is required. See :class:`SourceEngineWatcher` for an example
         """
-        for k in self.config_keys:
+        for key, value in self.config_keys.items():
             query = self._session.query(WatcherConfig).\
                 filter(WatcherConfig.watcherID == self._model_id).\
-                filter(WatcherConfig.key == k)
+                filter(WatcherConfig.key == key)
             try:
-                self.config[k] = query.one().value
-                self.logger.debug("Reload: {} = {}".format(k, self.config[k]))
+                self.config[key] = value['type'](query.one().value)
+                self.logger.debug(
+                    "Reload: {} = {}".format(key, self.config[key]))
             except NoResultFound:
-                self.logger.warning("No config w/ key found: {}".format(k))
+                if value['required']:
+                    self.logger.warning(
+                        "No config w/ key found: {}".format(key))
+                else:
+                    self.logger.debug("Optional key {} not found".format(key))
 
         self.logger.info("Reloaded Watcher (id={})".format(self._model.id))
         self.add_event(Event(type=EventType.WATCHER_RELOAD))
@@ -130,7 +129,7 @@ class Watcher(ABC, Thread):
         """
         user = self.get_user(nickname)
         self.add_event(Event(userID=user.id, gameID=self._model.gameID,
-                            type=EventType.USER_SCORE, info=str(score)))
+                             type=EventType.USER_SCORE, info=str(score)))
 
     def add_event(self, event):
         """ Add a event to the database

@@ -9,14 +9,18 @@ from lamon.models import Event, EventType
 class Quake3Watcher(Watcher):
     """ Watcher implementing communication to Quake 3 """
 
+    config_keys = {'address': {'type': str, 'required': True},
+                   'port': {'type': int, 'required': True},
+                   'timeout': {'type': int, 'required': True},
+                   'rcon_password': {'type': str, 'required': True}}
+
     def __init__(self, **kwargs):
-        config_keys = ["address", "port", "timeout", "rcon_password"]
         super().__init__(__name__, config_keys=config_keys, **kwargs)
 
         self.packet_prefix = ('\xff' * 4).encode()
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.settimeout(int(self.config['timeout']))
+        self.sock.settimeout(self.config['timeout'])
 
         self.connection_lost = False
 
@@ -25,7 +29,7 @@ class Quake3Watcher(Watcher):
         self.map_re = re.compile('map: (.*)')
 
     def runner(self):
-        self.sock.connect((self.config['address'], int(self.config['port'])))
+        self.sock.connect((self.config['address'], self.config['port']))
 
         while getattr(self, 'shutdown', True):
             try:

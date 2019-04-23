@@ -44,8 +44,7 @@ class TestWatcher(BaseTestCase):
         session = scoped_session(sessionmaker(bind=db.engine))
 
         self.watcher = FakeWatcher(
-            session=session, model_id=self.watcher_model.id,
-            config_keys=['key1', 'key2', 'key3'])
+            session=session, model_id=self.watcher_model.id)
 
     def tearDown(self):
         """ Kill fake watcher """
@@ -112,8 +111,8 @@ class TestWatcher(BaseTestCase):
         self.watcher.start()
         time.sleep(1) # Wait for watcher to finish
 
-        for i in self.watcher_model.config:
-            i.value = "updated"
+        self.watcher_model.config[0].value = "updated"
+        self.watcher_model.config[1].value = "40"
 
         db.session.commit()
 
@@ -123,8 +122,10 @@ class TestWatcher(BaseTestCase):
 
         self.assertEqual(after, before + 1)
 
-        for key, value in self.watcher.config.items():
-            self.assertTrue(value == "updated")
+        self.assertEqual(self.watcher.config['key1'], "updated")
+        self.assertTrue(isinstance(self.watcher.config['key1'], str))
+        self.assertEqual(self.watcher.config['key3'], 40)
+        self.assertTrue(isinstance(self.watcher.config['key3'], int))
 
     def test_add_event(self):
         """ Test event adding """

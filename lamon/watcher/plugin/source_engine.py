@@ -9,8 +9,12 @@ class SourceEngineWatcher(Watcher):
     engine
     """
 
+    config_keys = {'address': {'type': 'str', 'required': True},
+                   'port': {'type': int, 'required': True},
+                   'timeout': {'type': int, 'required': True},
+                   'app_id:': {'type': int, 'required': True}}
+
     def __init__(self, **kwargs):
-        config_keys = ["address", "port", "timeout", "app_id"]
         super().__init__(__name__, config_keys=config_keys, **kwargs)
 
     def runner(self):
@@ -45,8 +49,3 @@ class SourceEngineWatcher(Watcher):
                 continue
 
             self.add_score(p['name'], p['score'])
-
-    def reload(self):
-        super().reload()
-        self.config['port'] = int(self.config['port'])
-        self.config['timeout'] = float(self.config['timeout'])

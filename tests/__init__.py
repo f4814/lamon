@@ -23,7 +23,7 @@ class BaseTestCase(TestCase):
 
         return app
 
-    def setUp(self):
+    def setUp(self, threadClass='tests.test_watcher.fake.FakeWatcher'):
         """ Initialize database and add test data """
         db.create_all()
 
@@ -59,11 +59,9 @@ class BaseTestCase(TestCase):
         db.session.add(test1_user)
         db.session.add(test2_user)
 
-        watcher = Watcher(
-            threadClass='tests.test_watcher.fake.FakeWatcher')
+        watcher = Watcher( threadClass=threadClass)
         watcher.config.append(WatcherConfig(key='key1', value='value1'))
-        watcher.config.append(WatcherConfig(key='key2', value='value2'))
-        watcher.config.append(WatcherConfig(key='key3', value='value3'))
+        watcher.config.append(WatcherConfig(key='key3', value='1'))
         db.session.add(watcher)
 
         db.session.commit()
