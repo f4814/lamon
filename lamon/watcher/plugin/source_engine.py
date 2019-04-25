@@ -12,10 +12,15 @@ class SourceEngineWatcher(Watcher):
     config_keys = {'address': {'type': 'str', 'required': True},
                    'port': {'type': int, 'required': True},
                    'timeout': {'type': int, 'required': True},
-                   'app_id:': {'type': int, 'required': True}}
+                   'app_id:': {'type': int, 'required': True,
+                               'hint':
+                               """this is the app ID of the client, not the
+                               server. For example, for Team Fortress 2 440 has
+                               to be used instead of 232250 which is the ID of
+                               the server software."""}}
 
     def __init__(self, **kwargs):
-        super().__init__(__name__, config_keys=config_keys, **kwargs)
+        super().__init__(__name__, **kwargs)
 
     def runner(self):
         # Setup valve server querier
