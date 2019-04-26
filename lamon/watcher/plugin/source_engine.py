@@ -9,10 +9,10 @@ class SourceEngineWatcher(Watcher):
     engine
     """
 
-    config_keys = {'address': {'type': 'str', 'required': True},
+    config_keys = {'address': {'type': str, 'required': True},
                    'port': {'type': int, 'required': True},
                    'timeout': {'type': int, 'required': True},
-                   'app_id:': {'type': int, 'required': True,
+                   'app_id': {'type': int, 'required': True,
                                'hint':
                                """this is the app ID of the client, not the
                                server. For example, for Team Fortress 2 440 has
