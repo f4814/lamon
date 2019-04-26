@@ -20,10 +20,6 @@ class Watcher(ABC, Thread):
     :param logName: Name of the logger used by the watcher.
         When extending using __name__ is a good idea
 
-    :type config_keys: :class:`dict`
-    :attribute config_keys: Dict keys are config keys. Values is a dict
-        containing datatype (`type` key) and wether it is required (`required` key)
-
     :type session: :class:`sqlalchemy.orm.session.Session`
     :param session: SQLAlchemy session to access the database. You probably
         want a scoped_session
@@ -34,7 +30,34 @@ class Watcher(ABC, Thread):
     :raises TypeError: When initialized with a model whose threadClass does
         not fit the object
     """
+
     config_keys = {}
+    """ Plugins can specify which configuration values the user should be able
+    to set with this dict.
+
+    Each key of the dict is the name of a configuration key in the database.
+    The value is a dict with the following keys:
+
+        * *type*: Function to typecast a string (from the database) into
+            a usable value (Required)
+        * *required*: Whether this value is required (Required)
+        * *hint*: Text to show when editing this configuration value (Optional)
+        * *warning*: Warning to show when editing this configuration value (Optional)
+
+    Example:
+
+    .. code-block:: python
+
+        config_keys = {'address': {'type': 'str', 'required': True},
+                    'port': {'type': int, 'required': True},
+                    'timeout': {'type': int, 'required': True},
+                    'app_id:': {'type': int, 'required': True,
+                                'hint':
+                                \"\"\"this is the app ID of the client, not the
+                                server. For example, for Team Fortress 2 440 has
+                                to be used instead of 232250 which is the ID of
+                                the server software.\"\"\"}}
+    """
 
     def __init__(self, logName, session=None, model_id=None):
         self._session = session
@@ -116,7 +139,7 @@ class Watcher(ABC, Thread):
     def add_score(self, nickname, score):
         """ Add a score to the user.
 
-        This is a convenience function over :meth:`add_event`and
+        This is a convenience function over :meth:`add_event` and
         :meth:`get_user`
 
         :type nickname: str
@@ -135,8 +158,8 @@ class Watcher(ABC, Thread):
         """ Add a event to the database
 
         :type event: lamon.models.Event
-        :param event: Event to add to the database. event.watcherID and
-            event.time are set by this function
+        :param event: Event to add to the database. `event.watcherID` and
+            `event.time` are set by this function
         """
         event.watcherID = self._model_id
 
