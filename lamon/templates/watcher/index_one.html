@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+    {{ watcher }}
+
+    <form method="POST" action="{{ url_for('watchers.control') }}">
+        {{ form.csrf_token() }}
+        {{ form.watcher_id() }}
+        {{ form.start(class="btn btn-primary") }}
+        {{ form.stop(class="btn btn-primary") }}
+        {{ form.reload(class="btn btn-primary") }}
+    </form>
+{% endblock %}

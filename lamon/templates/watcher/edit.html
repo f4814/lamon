@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %} {{ watcher.__repr__() }} Watcher {% endblock %}
+
+{% block body %}
+{{ watcher.__repr__() }}
+
+<form method="POST">
+    {{ form.csrf_token }}
+
+    <div class="form-group">
+        {{ form.game.label }} {{ form.game(class_="form-control") }}
+    </div>
+
+    {% for key in form.watcher.config_keys %}
+        {% set field = form[key] %}
+        {% set helpid = 'help-' + key %}
+        <div class="form-group">
+            {{ field.label }}
+            {{ field(class_="form-control", ariaDescribedBy=helpid) }}
+
+            {% if form.watcher.config_keys[key]['hint'] %}
+                <small id="{{ helpid }}" class="form-text text-muted">
+                    {{ form.watcher.config_keys[key]['hint'] }}
+                </small>
+            {% endif %}
+
+            {% if form.watcher.config_keys[key]['danger'] %}
+                <small id="{{ helpid }}" class="form-text text-danger">
+                    DANGER: {{ form.watcher.config_keys[key]['danger'] }}
+                </small>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}

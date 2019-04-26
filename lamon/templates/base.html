@@ -29,10 +29,7 @@
                     {{ render_nav_dropdown(('Games', 'games.index'),
                         [('Stats', 'games.stats')])
                     }}
-                    {{ render_nav_dropdown(('Watchers', 'watchers.index'),
-                        [('Control', 'watchers.control'),
-                         ('Stats', 'watchers.stats')])
-                    }}
+                    {{ render_nav_item('Watchers', 'watchers.index') }}
                     {{ render_nav_dropdown(('Admin', 'admin.index'),
                         [('User', 'user.index_view'),
                         ('Game', 'game.index_view'),

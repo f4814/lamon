@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}Gamewatchers{% endblock %}
+{% block title %}Watcher Stats{% endblock %}
 
 {% block content %}
+    {% for watcher in watchers %}
+        <div class="row">
+            <div class="col">
+                {{ watcher[0] }}
+            </div>
+
+            {% if show_controls %}
+                <div class="col">
+                    <a href="{{ url_for('watchers.edit', watcher_id=watcher[0].id) }}">Edit</a>
+                </div>
+
+                <div class="col">
+                    <form method="POST" action="{{ url_for('watchers.control') }}">
+                        {{ watcher[1].csrf_token() }}
+                        {{ watcher[1].watcher_id() }}
+                        {{ watcher[1].start(class_="btn btn-primary") }}
+                        {{ watcher[1].stop(class_="btn btn-primary") }}
+                        {{ watcher[1].reload(class_="btn btn-primary") }}
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
 {% endblock %}
