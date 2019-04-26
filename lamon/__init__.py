@@ -101,19 +101,24 @@ def create_app(config_file='config.toml'):
     # DB logging
     db_logger = logging.getLogger("lamon.db")
 
-    if db_logger.level is not logging.NOTSET and db_logger.level > logging.DEBUG:
+    if db_logger.level <= logging.INFO:
         @event.listens_for(Engine, "before_cursor_execute")
         def before_cursor_execute(conn, cursor, statement,
-                                  parameters, context, executemany):
+                                    parameters, context, executemany):
             conn.info.setdefault('query_start_time', []).append(time.time())
 
         @event.listens_for(Engine, "after_cursor_execute")
         def after_cursor_execute(conn, cursor, statement,
-                                 parameters, context, executemany):
+                                    parameters, context, executemany):
             total = time.time() - conn.info['query_start_time'].pop(-1)
+
             if total > 0.01:
-                db_logger.debug("Query Complete: %s", statement)
-                db_logger.debug("Total Time: %f", total)
+                deb = db_logger.info
+            else:
+                deb = db_logger.debug
+
+            deb("Query Complete: %s", statement)
+            deb("Total Time: %f", total)
 
     # Database
     db.init_app(app)
