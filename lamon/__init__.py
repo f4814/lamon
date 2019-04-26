@@ -94,7 +94,8 @@ def create_app(config_file='config.toml'):
     @app.after_request
     def log_request(response):
         logger = app.logger.getChild('requests')
-        logger.debug("{} - {}".format(response.status_code, request.url))
+        logger.debug("{} - {} - {}".format(request.method,
+                                           response.status_code, request.url))
         return response
 
     # DB logging
