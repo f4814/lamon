@@ -5,7 +5,6 @@ import toml
 
 from flask import Flask, request
 from flask.logging import default_handler
-from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserManager, SQLAlchemyAdapter
 from sqlalchemy import event
@@ -14,7 +13,6 @@ from sqlalchemy.engine import Engine
 __version__ = '0.1.0'
 
 db = SQLAlchemy()
-migrate = Migrate()
 
 
 def dictDefault(d, default):
@@ -77,6 +75,28 @@ def load_config_file(config_file):
     return config
 
 
+def init_db(app):
+    from .models import User, Role, UserRoles
+
+    with app.app_context() as ctx:
+        role = None
+
+        if Role.query.filter(Role.name == 'admin').count() == 0:
+            app.logger.debug('Creating default role "admin"')
+            role = Role(name='admin')
+            db.session.add(role)
+            db.session.commit()
+        else:
+            role = Role.query.filter(Role.name == 'admin').one()
+
+        if User.query.filter(User.username == 'admin').count() == 0:
+            app.logger.debug('Creating default user "admin" (password: 1234)')
+            password = app.user_manager.hash_password('1234')
+            user = User(username='admin', password=password, roles=[role])
+            db.session.add(user)
+            db.session.commit()
+
+
 def create_app(config_file='config.toml'):
     # Load config
     config = load_config_file(config_file)
@@ -121,13 +141,15 @@ def create_app(config_file='config.toml'):
             deb("Total Time: %f", total)
 
     # Database
+    from .models import User, Event, Game, Watcher, Role, UserRoles, Nickname, \
+        WatcherConfig
     db.init_app(app)
-    migrate.init_app(app, db)
+    db.create_all(app=app)
 
     # User Manager
-    from .models import User
     db_adapter = SQLAlchemyAdapter(db, User)
     user_manager = UserManager(db_adapter, app)
+    init_db(app)
 
     # Admin views
     from .admin import register_admin
@@ -136,10 +158,6 @@ def create_app(config_file='config.toml'):
     # Register blueprints
     from .views import register_blueprints
     register_blueprints(app)
-
-    # Register cli commands
-    from .cmd import register_cmds
-    register_cmds(app)
 
     # Start Watchers
     from .watcher.manager import WatcherManager
