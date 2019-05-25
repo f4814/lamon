@@ -5,7 +5,7 @@ description = "Monitor gameservers"
 authors = ["Fabian Geiselhart <me@f4814n.de>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 flask = "^1.0"
 jinja2 = "^2.10"
 sqlalchemy = "^1.2"
@@ -14,7 +14,7 @@ flask-user = "=0.6.21"
 flask-admin = "^1.5"
 flask-wtf = "^0.14.2"
 psycopg2 = {version = "^2.8",optional = true}
-python-valve = {version = "^0.2.1",optional = true}
+python-valve = "^0.2.1"
 toml = "^0.10.0"
 
 [tool.poetry.dev-dependencies]
@@ -24,3 +24,19 @@ Flask-Testing = "^0.7.1"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = true
+envlist = py37,py36
+
+[testenv]
+deps = poetry
+whitelist_externals = make
+                      pg_config
+commands =
+    make build
+    make test
+    make clean
+"""

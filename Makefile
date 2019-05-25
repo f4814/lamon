@@ -1,9 +1,9 @@
 .PHONY: build
-build:
+build: install
 	poetry build
 
 .PHONY: install
-install: build
+install: 
 	poetry install
 
 .PHONY: test
@@ -12,7 +12,7 @@ test:
 
 .PHONY: clean
 clean:
-	rm -rf dist
+	rm -rf lamon.egg-info dist lamon/test.db
 
 .PHONY: run
 run:
