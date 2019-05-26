@@ -1,0 +1,9 @@
+[app]
+secret_key = "test"
+
+[database]
+database_uri = 'sqlite:///test.db'
+
+[watcher]
+
+[logging]

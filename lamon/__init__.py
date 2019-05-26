@@ -2,6 +2,7 @@ import logging
 import logging.config
 import time
 import toml
+import os
 
 from flask import Flask, request
 from flask.logging import default_handler
@@ -31,6 +32,9 @@ def dictDefault(d, default):
 def load_config_file(config_file):
     """ Load a configuration file """
     default_config = {
+        'app': {
+            'secret_key': ''
+        },
         'logging': {
             'version': 1,
             'root': {
@@ -66,11 +70,16 @@ def load_config_file(config_file):
     config = dictDefault(toml.load(config_file), default_config)
 
     config['flask'] = {}
-    config['flask']['SECRET_KEY'] = config['database']['secret_key']
     config['flask']['SQLALCHEMY_DATABASE_URI'] = config['database']['database_uri']
 
     for key, value in config['app'].items():
         config['flask'][key.upper()] = value
+
+    if config['flask']['SECRET_KEY'] == '':
+        logging.getLogger('flask.app').warning(
+            """No secret key in config file. Generating one now. Users will have
+            to login again after each restart""")
+        config['flask']['SECRET_KEY'] = os.urandom(16)
 
     return config
 

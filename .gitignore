@@ -95,3 +95,7 @@ migrations
 # Testing database
 test/test.db
 lamon/test.db
+lamon/lamon.db
+
+config.toml
+

@@ -3,8 +3,28 @@
 Introduction
 ############
 
+Installation
+============
+The easiest way to install lamon is via pip:
+
+.. code-block:: bash
+
+    pip install lamon
+
+
 Getting Started
 ===============
+In order to use lamon, you have to create a configuration file. To use the
+default one just copy `config.toml.example` to `config.toml` and start
+lamon in the same directory. This will create a sqlite3 database named `lamon.db`.
+
+If you just want to play around with lamon for a bit, you can use flask's
+development server.
+
+.. code-block:: bash
+
+    FLASK_APP=lamon python -m flask run
+
 
 Configuration
 =============
@@ -15,8 +35,15 @@ The configuration file (``./config.toml``) defines uses four seperate blocks:
     [app]
     # stuff
 
-Every key here is convertet to uppercase and (with it's corresponding value)
+Every key here is converted to uppercase and (with it's corresponding value)
 appended to the Flask config.
+
+You should configure a `secret_key`. This is used to encrypt client sessions.
+To generate a key you can use this in your shell:
+
+.. code-block:: bash
+
+    python -c 'import os; print(os.urandom(16))'
 
 .. code-block:: ini
 
@@ -100,6 +127,7 @@ Concepts
 **Games**
 
 **Managers**
+
 
 Managing Watchers
 =================
