@@ -3,6 +3,7 @@ import logging.config
 import time
 import toml
 import os
+import sys
 
 from flask import Flask, request
 from flask.logging import default_handler
@@ -67,7 +68,11 @@ def load_config_file(config_file):
         }
     }
 
-    config = dictDefault(toml.load(config_file), default_config)
+    try:
+        config = dictDefault(toml.load(config_file), default_config)
+    except FileNotFoundError:
+        logging.error("Could not load file: {}".format(config_file))
+        sys.exit(1)
 
     config['flask'] = {}
     config['flask']['SQLALCHEMY_DATABASE_URI'] = config['database']['database_uri']
