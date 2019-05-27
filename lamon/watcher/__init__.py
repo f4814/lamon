@@ -70,21 +70,21 @@ class Watcher(ABC, Thread):
         # Check for correct model
         qualname = type(self).__module__ + "." + type(self).__name__
         if qualname != self._model.threadClass:
-            raise TypeError("""Cannot initalize watcher of class {} with model
-                            where threadClass == {}""".
-                            format(qualname, self._model.threadClass))
+            raise TypeError(f"""Cannot initalize watcher of class {qualname} with
+                            model where threadClass == {self._model.threadClass}
+                            """)
 
         self.logger.propagate = False
         self.reload()
         self.logger.propagate = True
 
         # Initialize threading.Thread
-        super().__init__(name='Watcher-{}'.format(self._model.id))
+        super().__init__(name=f'Watcher-{self._model.id}')
 
     def run(self):
         """ Runs Watcher.runner in a new thread."""
         # Log start
-        self.logger.info('Started watcher (id={})'.format(self._model_id))
+        self.logger.info(f'Started watcher (id={self._model.id})')
         self.add_event(Event(type=EventType.WATCHER_START))
 
         try:
@@ -124,16 +124,14 @@ class Watcher(ABC, Thread):
                 filter(WatcherConfig.key == key)
             try:
                 self.config[key] = value['type'](query.one().value)
-                self.logger.debug(
-                    "Reload: {} = {}".format(key, self.config[key]))
+                self.logger.debug(f'Reload: {key} = {self.config[key]}')
             except NoResultFound:
                 if value['required']:
-                    self.logger.warning(
-                        "No config w/ key found: {}".format(key))
+                    self.logger.warning(f'No config w/ key found: {key}')
                 else:
-                    self.logger.debug("Optional key {} not found".format(key))
+                    self.logger.debug(f'Optional key {key} not found')
 
-        self.logger.info("Reloaded Watcher (id={})".format(self._model.id))
+        self.logger.info(f'Reloaded Watcher (id={self._model.id})')
         self.add_event(Event(type=EventType.WATCHER_RELOAD))
 
     def add_score(self, nickname, score):
@@ -186,8 +184,7 @@ class Watcher(ABC, Thread):
         try:
             return query.one()
         except NoResultFound:
-            raise ValueError("No user with given nickname ({}) found".
-                             format(nickname))
+            raise ValueError(f'No user with given nickname ({nickname}) found')
 
     def stop(self):
         """ Stops the watcher """
@@ -230,7 +227,6 @@ def load_watcher_class(className):
     watcher_ = getattr(module, className.split(".")[-1])
 
     if not issubclass(watcher_, Watcher):
-        raise TypeError(
-            "{} is not a subclass of watcher".format(str(watcher_)))
+        raise TypeError(f'{watcher_} is not a subclass of watcher')
 
     return watcher_

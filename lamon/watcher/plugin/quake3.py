@@ -112,8 +112,7 @@ class Quake3Watcher(Watcher):
 
         :raises WatcherException: Bas RCON Password
         """
-        respType, respBody = self.cmd(
-            'rcon "{}" {}'.format(self.config['rcon_password'], cmd))
+        respType, respBody = self.cmd(f'rcon "{self.config["rcon_password"]}" {cmd}')
 
         if respBody == 'Bad rconpassword.\n':
             raise WatcherException("Bad RCON Password")

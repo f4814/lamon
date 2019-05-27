@@ -55,12 +55,10 @@ class WatcherManager():
             id = model.id
 
         if id in self._watchers:
-            self.logger.warning(
-                "Cannot start already running watcher: {}".format(model))
-            raise ValueError(
-                "Cannot start watcher (id={}). Already running.".format(id))
+            self.logger.warning(f'Cannot start already running watcher: {model}')
+            raise ValueError(f'Cannot start watcher (id={id}). Already running.')
 
-        self.logger.info("Starting gamewatcher: {}".format(model))
+        self.logger.info(f'Starting gamewatcher: {model}')
 
         # Create db session not connected to flask
         session = scoped_session(sessionmaker(bind=self.db.engine))
@@ -92,9 +90,8 @@ class WatcherManager():
         if id in self._watchers:
             self._watchers[id].reload()
         else:
-            self.logger.warning("Cannot reload watcher: {}".format(model))
-            raise ValueError(
-                "Cannot reload watcher (id={}). Not running".format(id))
+            self.logger.warning(f'Cannot reload watcher: {model}')
+            raise ValueError(f'Cannot reload watcher (id={id}). Not running')
 
     def stop(self, id=None, model=None):
         """ Stop a watcher
@@ -115,13 +112,12 @@ class WatcherManager():
             id = model.id
 
         if id in self._watchers:
-            self.logger.info("Stopping watcher: {}".format(model))
+            self.logger.info(f'Stopping watcher: {model}')
             self._watchers[id].stop()
             self._watchers.pop(id)
         else:
-            self.logger.warning("Watcher thread not found: {}".format(model))
-            raise ValueError(
-                "Cannot stop watcher (id={}). Not running".format(id))
+            self.logger.warning(f'Watcher thread not found: {model}')
+            raise ValueError(f'Cannot stop watcher (id={id}). Not running')
 
     def is_running(self, id=None, model=None):
         """ Check if given watcher is currently running

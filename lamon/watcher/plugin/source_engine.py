@@ -40,8 +40,7 @@ class SourceEngineWatcher(Watcher):
                     continue
 
                 if server_info['app_id'] != int(self.config['app_id']):
-                    raise WatcherException(
-                        "Wrong app id on server: {}".format(server_info['app_id']))
+                    raise WatcherException(f'Wrong app id on server: {server_info["app_id"]}')
                 self._updatePlayers(server.players()['players'])
 
                 if connection_lost:  # Watcher reaquired connection

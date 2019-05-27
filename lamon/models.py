@@ -66,13 +66,13 @@ class Event(db.Model):
         msg = str(EventType(self.type)) + ": "
 
         if self.watcherID is not None:
-            msg += "Watcher = {}; ".format(str(self.watcher))
+            msg += f'Watcher = {self.watcher}; '
 
         if self.gameID is not None:
-            msg += "Game = {}; ".format(str(self.game))
+            msg += f'Game = {self.game}; '
 
         if self.userID is not None:
-            msg += "Gmae = {}; ".format(str(self.game))
+            msg += f'User = {self.user}; '
 
         return msg
 
@@ -116,8 +116,8 @@ class Watcher(db.Model):
     gameID = db.Column(db.Integer, db.ForeignKey('games.id'))
     game = db.relationship('Game', back_populates='watchers')
 
-    def __repr__(self): return "{} ({})".format(
-        self.game, self.config)
+    def __repr__(self):
+        return f'{self.game} ({self.config})'
 
 
 class Role(db.Model):
@@ -166,8 +166,7 @@ class Nickname(db.Model):
     game = db.relationship('Game', back_populates='nicknames')
 
     def __repr__(self):
-        r = "{} is {} in {}"
-        return r.format(self.user, self.nick, self.game)
+        return f'{self.user} is {self.nick} in {self.game}'
 
 
 class WatcherConfig(db.Model):
