@@ -18,13 +18,11 @@ In order to use lamon, you have to create a configuration file. To use the
 default one just copy `config.toml.example` to `config.toml` and start
 lamon in the same directory. This will create a sqlite3 database named `lamon.db`.
 
-If you just want to play around with lamon for a bit, you can use flask's
-development server.
+Lamon provides a simple cli wrapper, which should be sufficient in most cases.
 
 .. code-block:: bash
 
-    FLASK_APP=lamon python -m flask run
-
+    lamon --host 127.0.0.1 --port 5000 --config config.toml
 
 Configuration
 =============
