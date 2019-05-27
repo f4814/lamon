@@ -10,7 +10,9 @@ classifiers = [
     "Environment :: Web Environment",
     "Framework :: Flask",
     "Topic :: Games/Entertainment",
-    "Topic :: Internet :: WWW/HTTP :: Dynamic Content"
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: Implementation :: CPython"
 ]
 
 [tool.poetry.dependencies]
@@ -39,7 +41,7 @@ lamon = 'lamon.cli:main'
 legacy_tox_ini = """
 [tox]
 isolated_build = true
-envlist = py37,py36
+envlist = py37,py36,pypy36
 
 [testenv]
 deps = poetry
