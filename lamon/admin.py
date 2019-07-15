@@ -26,47 +26,8 @@ class GameView(AuthModelView):
     inline_models = [Nickname]
 
 
-class WatcherView(AuthModelView):
-    column_list = ('threadClass', 'game', 'user', 'config')
-    inline_models = [WatcherConfig, ]
-    form_choices = {
-        'threadClass': [
-            ('lamon.watcher.plugins.source_engine.SourceEngineWatcher',
-                'Source Engine Watcher'),
-            ('lamon.watcher.plugins.quake3.Quake3Watcher',
-                'Quake3 Watcher'),
-            ('tests.test_watcher.fake.FakeWatcher',
-                'Fake Watcher')
-        ]
-    }
-
-    def get_save_return_url(self, model, is_created=False):
-        """ Return the user to edit page after watcher creation. """
-        if is_created is True:
-            if request.path == self.get_url('.create_view'):
-                return self.get_url('.edit_view', id=model.id)+'&created=true'
-
-        return self.get_url('.index_view')
-
-    def create_form(self, obj=None):
-        """ The create form should only select the threadClass of the watcher """
-        form = super().create_form(obj)
-        del form.game
-        del form.config
-        return form
-
-    def edit_form(self, obj=None):
-        form = super().edit_form(obj)
-
-        if request.args.get('created', 'false') == 'true':
-            del form.threadClass
-
-        return form
-
-
 def register_admin(app):
     admin = Admin(app, name='lamon', template_mode='bootstrap3')
 
     admin.add_view(UserView(User, db.session))
     admin.add_view(GameView(Game, db.session))
-    admin.add_view(WatcherView(Watcher, db.session))

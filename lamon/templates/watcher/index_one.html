@@ -12,4 +12,9 @@
         {{ form.stop(class="btn btn-primary") }}
         {{ form.reload(class="btn btn-primary") }}
     </form>
+
+    {% for e in watcher.events %}
+    {{ e }}
+    <br>
+    {% endfor %}
 {% endblock %}

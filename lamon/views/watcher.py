@@ -50,18 +50,15 @@ def edit(watcher_id):
         if form.validate_on_submit():
             watcher_model.game = form.data['game']
 
-            # XXX This is probably ugly
             for key, opts in watcher_class.config_keys.items():
                 try:
-                    watcher_config = WatcherConfig.query.\
+                    config = WatcherConfig.query.\
                         filter(WatcherConfig.watcher == watcher_model).\
-                        filter(WatcherConfig.key == key).\
-                        update({'value': form.data[key]})
-                except NoResultFound:
-                    watcher_config = WatcherConfig(watcher=watcher_model,
-                                                   key=key,
-                                                   value=form.data[key])
-                    db.session.add(watcher_config)
+                        filter(WatcherConfig.key == key).one()
+                    config.key = form.data[key]
+                except NoResultFound: # Key has not been added yet
+                    config = WatcherConfig(watcher=watcher_model, key=key, value=form.data[key])
+                    db.session.add(config)
 
             db.session.commit()
 
