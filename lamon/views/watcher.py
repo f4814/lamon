@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, current_app, flash, redirect, url_for
+from flask import Blueprint, render_template, request, current_app, flash, redirect, url_for, abort
 from flask_user import roles_required, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -15,7 +15,11 @@ watcher_blueprint = Blueprint(
 @watcher_blueprint.route('/<int:watcher_id>')
 def index(watcher_id=None):
     if watcher_id:
-        watcher = Watcher.query.filter(Watcher.id == watcher_id).one()
+        try:
+            watcher = Watcher.query.filter(Watcher.id == watcher_id).one()
+        except NoResultFound:
+            abort(404)
+
         form = WatcherControlForm.for_watcher(watcher.id)()
 
         return render_template('watcher/index_one.html',
