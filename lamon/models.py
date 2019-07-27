@@ -201,6 +201,7 @@ class EventType(IntEnum):
     :param WATCHER_STOP: Watcher stopped
     :param WATCHER_CONNECTION_LOST: Watcher lost connection
     :param WATCHER_CONNECTION_REAQUIRED: Watcher got connection back
+    :param WATCHER_EXCEPTION: An exception occured in the watcher
 
     **User related events**. :attr:`Event.userID`, :attr:`Event.watcherID` and
     :attr:`Event.gameID` have to be set.
@@ -216,6 +217,7 @@ class EventType(IntEnum):
     WATCHER_STOP = 1002
     WATCHER_CONNECTION_LOST = 1003
     WATCHER_CONNECTION_REAQUIRED = 1004
+    WATCHER_EXCEPTION = 1005
 
     USER_SCORE = 2000
     USER_JOIN = 2001

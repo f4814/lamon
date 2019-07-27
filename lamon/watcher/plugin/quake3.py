@@ -15,7 +15,7 @@ class Quake3Watcher(Watcher):
                    'rcon_password': {'type': str, 'required': True}}
 
     def __init__(self, **kwargs):
-        super().__init__(__name__, config_keys=config_keys, **kwargs)
+        super().__init__(__name__, **kwargs)
 
         self.packet_prefix = ('\xff' * 4).encode()
 

@@ -5,14 +5,14 @@ from threading import Thread
 from importlib import import_module
 from logging import getLogger, StreamHandler
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from datetime import datetime
 
 from lamon import db
+from .events import Watcher__Events
 from ..models import Watcher as WatcherModel
-from ..models import Nickname, Event, WatcherConfig, EventType, User
+from ..models import Nickname, WatcherConfig, User
 
 
-class Watcher(ABC, Thread):
+class Watcher(ABC, Thread, Watcher__Events):
     """ Abstract watcher class. Has to be extended to create a "real"
     watcher plugin.
 
@@ -85,11 +85,12 @@ class Watcher(ABC, Thread):
         """ Runs Watcher.runner in a new thread."""
         # Log start
         self.logger.info(f'Started watcher (id={self._model.id})')
-        self.add_event(Event(type=EventType.WATCHER_START))
+        self.start_event()
 
         try:
             self.runner()
         except Exception as e:
+            self.exception_event(e)
             self.logger.exception(e)
 
         self._session.commit()
@@ -132,59 +133,7 @@ class Watcher(ABC, Thread):
                     self.logger.debug(f'Optional key {key} not found')
 
         self.logger.info(f'Reloaded Watcher (id={self._model.id})')
-        self.add_event(Event(type=EventType.WATCHER_RELOAD))
-
-    def add_score(self, nickname, score):
-        """ Add a score to the user.
-
-        This is a convenience function over :meth:`add_event` and
-        :meth:`get_user`
-
-        :type nickname: str
-        :param nickname: Nickname of the user
-
-        :type score: int or float
-        :param score: **Absolute** score of the user
-
-        :raises ValueError: When no user with the given nickname is found
-        """
-        user = self.get_user(nickname)
-        self.add_event(Event(userID=user.id, gameID=self._model.gameID,
-                             type=EventType.USER_SCORE, info=str(score)))
-
-    def add_event(self, event):
-        """ Add a event to the database
-
-        :type event: lamon.models.Event
-        :param event: Event to add to the database. `event.watcherID` and
-            `event.time` are set by this function
-        """
-        event.watcherID = self._model_id
-
-        if event.time is None:
-            event.time = datetime.now()
-
-        self._session.add(event)
-        self._session.commit()
-
-        self.logger.debug(str(event))
-
-    def get_user(self, nickname):
-        """ Get the :class:`lamon.models.User` with the associated Nickname
-
-        :type nickname: str
-        :param nickname: Nickname
-
-        :raises ValueError: When no user with the given nickname is found
-        """
-        query = self._session.query(User).join(Nickname).\
-            filter(Nickname.nick == nickname).\
-            filter(Nickname.gameID == self._model.game.id)
-
-        try:
-            return query.one()
-        except NoResultFound:
-            raise ValueError(f'No user with given nickname ({nickname}) found')
+        self.reload_event()
 
     def stop(self):
         """ Stops the watcher """
@@ -194,7 +143,7 @@ class Watcher(ABC, Thread):
         self.join()
         self.logger.debug("Watcher thread stopped")
 
-        self.add_event(Event(type=EventType.WATCHER_STOP))
+        self.stop_event()
 
         self._session.commit()
         self._session.close()

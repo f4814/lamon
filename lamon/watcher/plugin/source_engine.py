@@ -33,8 +33,7 @@ class SourceEngineWatcher(Watcher):
                 try:
                     server_info = server.info()
                 except NoResponseError:
-                    self.add_event(
-                        Event(type=EventType.WATCHER_CONNECTION_LOST))
+                    self.connection_lost_event()
                     self.logger.debug("Watcher connection failure")
                     connection_lost = True
                     continue
@@ -44,12 +43,11 @@ class SourceEngineWatcher(Watcher):
                 self._updatePlayers(server.players()['players'])
 
                 if connection_lost:  # Watcher reaquired connection
-                    self.add_event(
-                        Event(type=EventType.WATCHER_CONNECTION_REAQUIRED))
+                    self.connection_reaquired_event()
 
     def _updatePlayers(self, players):
         for p in players:
             if not p['name']:  # Valve doc mentions possible empty players
                 continue
 
-            self.add_score(p['name'], p['score'])
+            self.score_event(p['name'], p['score'])

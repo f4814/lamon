@@ -86,7 +86,11 @@ from .watcher import FakeWatcher
 @pytest.fixture
 def flask():
     app = create_app('tests/config.toml')
-    return app
+    yield app
+
+    with app.app_context():
+        db.drop_all()
+        db.session.remove()
 
 # @pytest.fixture(scope="function")
 @pytest.fixture
