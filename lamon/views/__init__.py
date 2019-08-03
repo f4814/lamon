@@ -9,3 +9,4 @@ def register_blueprints(app):
     app.register_blueprint(user_blueprint, url_prefix='/user')
     app.register_blueprint(game_blueprint, url_prefix='/game')
     app.register_blueprint(watcher_blueprint, url_prefix='/watcher')
+    # app.register_blueprint(stats_blueprint, url_prefix='/stats')

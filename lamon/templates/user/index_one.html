@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1> {{ user.username }}'s Profile:</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Game</th>
+                <th scope="col">Nickname</th>
+                <th scope="col">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nick in nicknames %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('games.index_one', game_id=nick.game.id) }}">
+                        {{ nick.game.name }}
+                    </a>
+                </td>
+                <td>{{ nick.nick }}</td>
+                <td>0</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </thead>
+{% endblock %}

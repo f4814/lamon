@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Game: {{ game.name }}{% endblock %}
+
+{% block content %}
+    <h1>Game: {{ game.name }}</h1>
+    <h2>Watchers</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td scope="col">Info</td>
+                    <td scope="col">Currently Playing</td>
+                    <td scope="col">Total Players</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for watcher in watchers %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('watchers.index_one', watcher_id=watcher.id) }}">
+                                {{ watcher.game.name }} watcher
+                            </a>
+                        </td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                {% endfor%}
+            </tbody>
+        </table>
+    <h2>Players</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td scope="col">Username</td>
+                    <td scope="col">Nickname</td>
+                    <td scope="col">Score</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('users.index_one', user_id=player.id) }}">
+                                {{ player.username }}
+                            </a>
+                        </td>
+                        <td>{{ player.nickname }}</td>
+                        <td>0</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+{% endblock %}

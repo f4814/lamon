@@ -26,27 +26,19 @@
             <div class="collapse navbar-collapse" id="main-navbar">
                 <ul class="navbar-nav mr-auto">
                     {{ render_nav_item('Home', 'main.index') }}
-                    {{ render_nav_dropdown(('Games', 'games.index'),
-                        [('Stats', 'games.stats')])
-                    }}
-                    {{ render_nav_dropdown(('Watchers', 'watchers.index'),
-                        [('List', 'watchers.index'),
-                         ('Create', 'watchers.create')])
-                        }}
-                    {{ render_nav_dropdown(('Admin', 'admin.index'),
-                        [('User', 'user.index_view'),
-                        ('Game', 'game.index_view')])
-                    }}
-                    {{ render_nav_dropdown(('Users', 'users.index'),
-                        [('Stats', 'users.stats')])
-                    }}
+                    {{ render_nav_item('Games', 'games.index') }}
+                    {{ render_nav_item('Watchers', 'watchers.index') }}
+                    {{ render_nav_item('Users', 'users.index') }}
+                    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+                        {{ render_nav_item('Admin', 'admin.index') }}
+                    {% endif %}
                 </ul><!-- /.navbar-nav -->
                 <ul class="navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
-                    {{ render_nav_item('Profile', 'user.profile') }}
-                    {{ render_nav_item('Log out', 'user.logout') }}
+                        {{ render_nav_item('Profile', 'user.profile') }}
+                        {{ render_nav_item('Log out', 'user.logout') }}
                     {% else %}
-                    {{ render_nav_item('Log in', 'user.login') }}
+                        {{ render_nav_item('Log in', 'user.login') }}
                     {% endif %}
                 </ul><!-- /.navbar-right -->
             </div><!-- /.navbar-collapse -->
@@ -65,7 +57,7 @@
             {{ render_alerts() }}
             <div class="content-wrapper">
                 {% block content %}{% endblock %}
-                {% block body %}{% endblock %}
+                {# {% block body %}{% endblock %} #}
             </div>
         </main><!-- /.container -->
 

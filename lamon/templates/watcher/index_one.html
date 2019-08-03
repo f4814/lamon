@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}{% endblock %}
+{% block title %}Watcher: {{ watcher }}{% endblock %}
 
-{% block body %}
-    {{ watcher }}
+{% block content %}
+    <h1>Watcher: {{ watcher }}</h1>
 
-    <form method="POST" action="{{ url_for('watchers.control') }}">
+    <form method="POST" action="{{ url_for('watchers.control', watcher_id=watcher.id) }}">
         {{ form.csrf_token() }}
-        {{ form.watcher_id() }}
         {{ form.start(class="btn btn-primary") }}
         {{ form.stop(class="btn btn-primary") }}
         {{ form.reload(class="btn btn-primary") }}

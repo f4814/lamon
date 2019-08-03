@@ -1,29 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}Watcher Stats{% endblock %}
+{% block title %}Watchers{% endblock %}
 
 {% block content %}
-    {% for watcher in watchers %}
-        <div class="row">
-            <div class="col">
-                {{ watcher[0] }}
-            </div>
-
-            {% if show_controls %}
-                <div class="col">
-                    <a href="{{ url_for('watchers.edit', watcher_id=watcher[0].id) }}">Edit</a>
-                </div>
-
-                <div class="col">
-                    <form method="POST" action="{{ url_for('watchers.control') }}">
-                        {{ watcher[1].csrf_token() }}
-                        {{ watcher[1].watcher_id() }}
-                        {{ watcher[1].start(class_="btn btn-primary") }}
-                        {{ watcher[1].stop(class_="btn btn-primary") }}
-                        {{ watcher[1].reload(class_="btn btn-primary") }}
-                    </form>
-                </div>
-            {% endif %}
-        </div>
-    {% endfor %}
+    <h1>Watchers</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Game</td>
+                <td>Class</td>
+                <td>Currently Playing</td>
+                <td>Number of Players</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for watcher in watchers %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('watchers.index_one', watcher_id=watcher.id) }}">
+                            {{ watcher.game.name }} watcher
+                        </a>
+                    </td>
+                    <td>{{ watcher.threadClass }}</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

@@ -5,24 +5,14 @@ from wtforms.validators import DataRequired, Optional
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 
-class WatcherControlForm(FlaskForm):
+class ControlForm(FlaskForm):
     """ Form used to control a watcher. """
     reload = SubmitField('reload')
     start = SubmitField('start')
     stop = SubmitField('stop')
-    watcher_id = HiddenField('watcher_id', validators=[DataRequired()])
-
-    @classmethod
-    def for_watcher(cls, watcher_id):
-        """ Prepare form for a specific watcher """
-        cls.watcher_id = HiddenField('watcher_id',
-                                     validators=[DataRequired()],
-                                     default=watcher_id)
-
-        return cls
 
 
-class WatcherCreateForm(FlaskForm):
+class CreateForm(FlaskForm):
     """ Form used to select which thread_class the newly created watcher will
     use
     """
@@ -37,7 +27,7 @@ class WatcherCreateForm(FlaskForm):
     ])
 
 
-class WatcherEditForm(FlaskForm):
+class EditForm(FlaskForm):
     """ Form used to edit a watcher instance """
     game = QuerySelectField(allow_blank=True)
 

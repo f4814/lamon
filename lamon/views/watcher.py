@@ -3,7 +3,7 @@ from flask_user import roles_required, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
 from .. import db
-from ..forms import WatcherControlForm, WatcherCreateForm, WatcherEditForm
+from ..forms.watcher import ControlForm, CreateForm, EditForm
 from ..models import Watcher, Game, WatcherConfig
 from ..watcher import load_watcher_class
 
@@ -12,33 +12,22 @@ watcher_blueprint = Blueprint(
 
 
 @watcher_blueprint.route('/')
+def index():
+    watchers = Watcher.query.all()
+    return render_template('watcher/index.html', watchers=list(watchers))
+
+
 @watcher_blueprint.route('/<int:watcher_id>')
-def index(watcher_id=None):
-    if watcher_id:
-        try:
-            watcher = Watcher.query.filter(Watcher.id == watcher_id).one()
-        except NoResultFound:
-            abort(404)
+def index_one(watcher_id):
+    try:
+        watcher = Watcher.query.filter(Watcher.id == watcher_id).one()
+    except NoResultFound:
+        abort(404)
 
-        form = WatcherControlForm.for_watcher(watcher.id)()
+    form = ControlForm()
 
-        return render_template('watcher/index_one.html',
-                               watcher=watcher, form=form)
-    else:
-        watchers = []
-        show_controls = current_user.is_authenticated and current_user.has_role(
-            'admin')
-
-        for watcher in db.session.query(Watcher).all():
-            if show_controls:
-                form = WatcherControlForm.for_watcher(watcher.id)()
-            else:
-                form = None
-
-            watchers.append((watcher, form))
-
-        return render_template('watcher/index.html', watchers=watchers,
-                               show_controls=show_controls)
+    return render_template('watcher/index_one.html',
+                           watcher=watcher, form=form)
 
 
 @watcher_blueprint.route('/<int:watcher_id>/edit', methods=['GET', 'POST'])
@@ -47,7 +36,7 @@ def edit(watcher_id):
     watcher_model = Watcher.query.filter(Watcher.id == watcher_id).one()
     watcher_class = load_watcher_class(watcher_model.threadClass)
 
-    form = WatcherEditForm.load_config(watcher_class, watcher_model)()
+    form = EditForm.load_config(watcher_class, watcher_model)()
     form.game.query = Game.query
 
     if request.method == 'POST':
@@ -60,8 +49,9 @@ def edit(watcher_id):
                         filter(WatcherConfig.watcher == watcher_model).\
                         filter(WatcherConfig.key == key).one()
                     config.key = form.data[key]
-                except NoResultFound: # Key has not been added yet
-                    config = WatcherConfig(watcher=watcher_model, key=key, value=form.data[key])
+                except NoResultFound:  # Key has not been added yet
+                    config = WatcherConfig(
+                        watcher=watcher_model, key=key, value=form.data[key])
                     db.session.add(config)
 
             db.session.commit()
@@ -73,28 +63,22 @@ def edit(watcher_id):
     return render_template('watcher/edit.html', watcher=watcher_model, form=form)
 
 
-@watcher_blueprint.route('/<int:watcher_id>/stats')
-def stats(watcher_id):
-    watcher = Watcher.query.filter(Watcher.id == watcher_id).one()
-    return render_template('watcher/stats.html', watcher=watcher)
-
-
-@watcher_blueprint.route('/control', methods=['POST'])
+@watcher_blueprint.route('/<int:watcher_id>/control', methods=['POST'])
 @roles_required(['admin'])
-def control():
+def control(watcher_id):
     app = current_app
-    form = WatcherControlForm()
+    form = ControlForm()
 
     if form.validate_on_submit():
         try:
             if form.data['start']:
-                app.watcher_manager.start(id=form.data['watcher_id'])
+                app.watcher_manager.start(id=watcher_id)
                 flash('Started watcher', 'success')
             elif form.data['stop']:
-                app.watcher_manager.stop(id=form.data['watcher_id'])
+                app.watcher_manager.stop(id=watcher_id)
                 flash('Stopped watcher', 'success')
             elif form.data['reload']:
-                app.watcher_manager.reload(id=form.data['watcher_id'])
+                app.watcher_manager.reload(id=watcher_id)
                 flash('Reloaded watcher', 'success')
         except ValueError as e:
             flash(str(e), 'warning')
@@ -109,7 +93,7 @@ def control():
 def create():
     app = current_app
 
-    form = WatcherCreateForm()
+    form = CreateForm()
 
     if request.method == 'POST':
         if form.validate_on_submit():

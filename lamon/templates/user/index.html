@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Users</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>
+                        {{ user.username }}
+                        <a href="{{ url_for('users.index_one', user_id = user.id) }}">
+                            (Profile)
+                        </a>
+                    </td>
+                    <td>0</td>
+            {% endfor %}
+{% endblock %}
