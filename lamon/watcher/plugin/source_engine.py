@@ -1,11 +1,12 @@
 from valve.source.a2s import ServerQuerier, NoResponseError
 
 from .. import Watcher, WatcherException
-from lamon.models import Event, EventType
+from lamon.models import EventType
 
 
 class SourceEngineWatcher(Watcher):
-    """Watcher implementating communication to games based on Valve's source
+    """
+    Watcher implementating communication to games based on Valve's source
     engine
     """
 
@@ -18,6 +19,18 @@ class SourceEngineWatcher(Watcher):
                                server. For example, for Team Fortress 2 440 has
                                to be used instead of 232250 which is the ID of
                                the server software."""}}
+
+    log_parser = {
+        'User (\c*) scored: (\c*)': {
+            'event': EventType.USER_SCORE,
+            'groups': {
+                0: {
+                },
+                1: {
+                }
+            }
+        }
+    }
 
     def __init__(self, **kwargs):
         super().__init__(__name__, **kwargs)
