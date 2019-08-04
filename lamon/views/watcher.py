@@ -21,8 +21,7 @@ def index_one(watcher_id):
     except NoResultFound:
         abort(404)
 
-    return render_template('watcher/index_one.html',
-                           watcher=watcher, form=form)
+    return render_template('watcher/index_one.html', watcher=watcher)
 
 
 @watcher_blueprint.route('/<int:id>/start')

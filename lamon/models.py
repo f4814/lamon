@@ -102,6 +102,7 @@ class Watcher(db.Model):
 
     :param threadClass: Implementation of the process
     :param config: Configuration values the process needs (like server ip)
+    :param info: Description of the watcher
     :param events: Events occured in the watcher
     :param game: Game watched by the watcher
     """
@@ -110,6 +111,7 @@ class Watcher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     threadClass = db.Column(db.String)
     config = db.relationship('WatcherConfig', back_populates='watcher')
+    info = db.Column(db.String)
 
     events = db.relationship('Event', back_populates='watcher')
 
@@ -117,7 +119,7 @@ class Watcher(db.Model):
     game = db.relationship('Game', back_populates='watchers')
 
     def __repr__(self):
-        return f'{self.game} ({self.config})'
+        return f'{self.game} ({self.info})'
 
 
 class Role(db.Model):

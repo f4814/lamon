@@ -49,8 +49,8 @@ class GameView(AuthModelView):
 class WatcherView(AuthModelView):
     can_view_details = True
 
-    column_list = ('game', 'config')
-    column_details_list = ('game', 'config', 'events')
+    column_list = ('game', 'info', 'config')
+    column_details_list = ('game', 'info', 'config', 'events')
     form_excluded_columns = ['events']
     inline_models = [WatcherConfig]
 
