@@ -74,6 +74,9 @@ class Event(db.Model):
         if self.userID is not None:
             msg += f'User = {self.user}; '
 
+        if self.info is not None:
+            msg += f'Info = {self.info}'
+
         return msg
 
 
