@@ -78,7 +78,7 @@ class WatcherView(AuthModelView):
     column_extra_row_actions = [
         EndpointLinkRowAction('glyphicon glyphicon-play', 'watchers.start'),
         EndpointLinkRowAction('glyphicon glyphicon-stop', 'watchers.stop'),
-        EndpointLinkRowAction('glyphicon glyphicon-refresh', 'watchers.reload')
+        EndpointLinkRowAction('glyphicon glyphicon-refresh', 'watchers.restart')
     ]
 
 

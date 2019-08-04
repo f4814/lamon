@@ -70,10 +70,8 @@ class WatcherManager():
         self._watchers[id] = watcher
         watcher.start()
 
-    def reload(self, id=None, model=None):
-        """ Reload the configuration of a watcher
-
-        Either id or model is required as argument
+    def restart(self, **kwargs):
+        """ Call stop and then start on watcher. Arguments are
 
         :type id: int
         :param id: Database id of watcher (Default value = None)
@@ -82,17 +80,12 @@ class WatcherManager():
         :param model: Database model of watcher (Default value = None)
 
         :raises ValueError: When watcher is not running
+        :raises TypeError: When threadClass of watcher model is no subclass of
+            Watcher
+        :raises KeyError: When a required config-key is missing
         """
-        if id is not None:
-            model = WatcherModel.query.filter(WatcherModel.id == id).one()
-        elif model is not None:
-            id = model.id
-
-        if id in self._watchers:
-            self._watchers[id].reload()
-        else:
-            self.logger.warning(f'Cannot reload watcher: {model}')
-            raise ValueError(f'Cannot reload watcher (id={id}). Not running')
+        self.stop(**kwargs)
+        self.start(**kwargs)
 
     def stop(self, id=None, model=None):
         """ Stop a watcher

@@ -44,11 +44,11 @@ def stop(id):
         flash(str(e), 'warning')
     return redirect(request.referrer or url_for('watchers.index_one', watcher_id=id))
 
-@watcher_blueprint.route('/<int:id>/reload')
+@watcher_blueprint.route('/<int:id>/restart')
 @roles_required(['admin'])
-def reload(id):
+def restart(id):
     try:
-        current_app.watcher_manager.reload(id=id)
+        current_app.watcher_manager.restart(id=id)
     except ValueError as e:
         flash(str(e), 'warning')
     return redirect(request.referrer or url_for('watchers.index_one', watcher_id=id))

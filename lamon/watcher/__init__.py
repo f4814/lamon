@@ -29,6 +29,7 @@ class Watcher(ABC, Thread, Watcher__Events):
 
     :raises TypeError: When initialized with a model whose threadClass does
         not fit the object
+    :raises KeyError: When a required config-key is missing
     """
 
     config_keys = {}
@@ -74,9 +75,21 @@ class Watcher(ABC, Thread, Watcher__Events):
                             model where threadClass == {self._model.threadClass}
                             """)
 
-        self.logger.propagate = False
-        self.reload()
-        self.logger.propagate = True
+        # Load config_keys into self.config
+        self.logger.debug(f'Loading watcher configuration')
+        for key, value in self.config_keys.items():
+            query = self._session.query(WatcherConfig).\
+                filter(WatcherConfig.watcherID == self._model_id).\
+                filter(WatcherConfig.key == key)
+            try:
+                self.config[key] = value['type'](query.one().value)
+                self.logger.debug(f'Config: {key} = {self.config[key]}')
+            except NoResultFound:
+                if value['required']:
+                    self.logger.warning(f'No config w/ key found: {key}')
+                    raise KeyError(f'Watcher has no {key} config-key')
+
+                self.logger.debug(f'Optional key {key} not found')
 
         # Initialize threading.Thread
         super().__init__(name=f'Watcher-{self._model.id}')
@@ -115,28 +128,6 @@ class Watcher(ABC, Thread, Watcher__Events):
         query = self._session.query(WatcherModel).\
             filter(WatcherModel.id == self._model_id)
         return query.one()
-
-    def reload(self):
-        """ Reload all config keys (specified in Watcher.config_keys)
-
-        :raises KeyError: If a required configkey is missing
-        """
-        for key, value in self.config_keys.items():
-            query = self._session.query(WatcherConfig).\
-                filter(WatcherConfig.watcherID == self._model_id).\
-                filter(WatcherConfig.key == key)
-            try:
-                self.config[key] = value['type'](query.one().value)
-                self.logger.debug(f'Reload: {key} = {self.config[key]}')
-            except NoResultFound:
-                if value['required']:
-                    self.logger.warning(f'No config w/ key found: {key}')
-                    raise KeyError(f'Watcher has no {key} config-key')
-                else:
-                    self.logger.debug(f'Optional key {key} not found')
-
-        self.logger.info(f'Reloaded Watcher (id={self._model.id})')
-        self.reload_event()
 
     def stop(self):
         """ Stops the watcher """

@@ -1,15 +1,10 @@
 from datetime import datetime
 
-from ..models import Watcher as WatcherModel
 from ..models import EventType, Event
 
 
 class Watcher__Events():
     """ Helper functions to emit supported events """
-
-    def reload_event(self):
-        """ Saves a :attr:`~EventType.WATCHER_RELOAD` event """
-        self._add_event(Event(type=EventType.WATCHER_RELOAD))
 
     def start_event(self):
         """ Saves a :attr:`~EventType.WATCHER_START` event """

@@ -72,16 +72,3 @@ class TestManagerStop():
         """ Test stopping watcher no present in the database """
         with pytest.raises(NoResultFound):
             flask.watcher_manager.stop(id=watcher_model_.id+1)
-
-class TestManagerReload():
-    """ Test Watcher reload """
-
-    def test_missing_keys(self, watcher_model_, flask):
-        # Patch fake watcher
-        flask.watcher_manager.start(model=watcher_model_)
-        flask.watcher_manager._watchers[watcher_model_.id].config_keys = {
-            'missing': {'required': True, 'type': str}
-        }
-
-        with pytest.raises(KeyError):
-            flask.watcher_manager.reload(id=watcher_model_.id)

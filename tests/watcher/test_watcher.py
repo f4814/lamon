@@ -65,7 +65,7 @@ class TestWatcher():
                 if t.name == fake_watcher.name:
                     return
 
-        assert False # Thread not found
+        assert False  # Thread not found
 
     def test_stop(self, fake_watcher, session):
         """ Test stopping watcher thread """
@@ -86,41 +86,19 @@ class TestWatcher():
             if isinstance(t, Watcher):
                 assert t.name != fake_watcher.name
 
-    def test_missing_keys(self, fake_watcher):
-        fake_watcher.config_keys = {'missing': {'required': True, 'type': str}}
+    def test_missing_keys(self, monkeypatch, watcher_model, session):
+        """ Test watcher reacting to missing, required config-keys """
         with pytest.raises(KeyError):
-            fake_watcher.reload()
-
-    def test_reload(self, fake_watcher, watcher_model, session):
-        """ Test reloading mechanism """
-        query = session.query(Event).\
-            filter(Event.watcherID == fake_watcher._model_id).\
-            filter(Event.type == int(EventType.WATCHER_RELOAD))
-
-        fake_watcher.start()
-        time.sleep(1) # Wait for watcher to finish
-
-        watcher_model.config[0].value = "updated"
-        watcher_model.config[1].value = "40"
-
-        session.commit()
-
-        before = len(query.all())
-        fake_watcher.reload()
-        after = len(query.all())
-
-        assert after == before + 1
-
-        assert fake_watcher.config['key1'] == "updated"
-        assert isinstance(fake_watcher.config['key1'], str)
-        assert fake_watcher.config['key3'] == 40
-        assert isinstance(fake_watcher.config['key3'], int)
+            print(FakeWatcher.config_keys)
+            fake_watcher = FakeWatcher(session=session, model_id=watcher_model.id,
+                                       config_keys={'missing': {'required': True, 'type': str}})
 
 
 class TestWatcherEvents():
     def test_add_event(self, fake_watcher, session):
         """ Test event adding """
-        e = Event(type=EventType.WATCHER_RELOAD, time=datetime.now(), info='TEST')
+        e = Event(type=EventType.WATCHER_START,
+                  time=datetime.now(), info='TEST')
         fake_watcher._add_event(e)
 
         query = session.query(Event).\

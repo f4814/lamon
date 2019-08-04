@@ -34,7 +34,7 @@ class User(db.Model, UserMixin):
 class Event(db.Model):
     """ Events are used log keep a log of things happening. This includes events
     on watched servers (scores, kills), server events (unavailable) and
-    watcher events (restarted, started, stopped).
+    watcher events (started, stopped).
 
     :param type: An :class:`EventType` specifies how to handle this event
     :param time: Time the event occurred
@@ -198,7 +198,6 @@ class EventType(IntEnum):
 
     **Watcher related events**. :attr:`Event.watcherID` has to be set
 
-    :param WATCHER_RELOAD: Watcher reloaded it's config.
     :param WATCHER_START: Watcher started
     :param WATCHER_STOP: Watcher stopped
     :param WATCHER_CONNECTION_LOST: Watcher lost connection
@@ -214,12 +213,11 @@ class EventType(IntEnum):
     :param USER_DIE: User died in game
     :param USER_RESPAWN: User respawned after death
     """
-    WATCHER_RELOAD = 1000
-    WATCHER_START = 1001
-    WATCHER_STOP = 1002
-    WATCHER_CONNECTION_LOST = 1003
-    WATCHER_CONNECTION_REAQUIRED = 1004
-    WATCHER_EXCEPTION = 1005
+    WATCHER_START = 1000
+    WATCHER_STOP = 1001
+    WATCHER_CONNECTION_LOST = 1002
+    WATCHER_CONNECTION_REAQUIRED = 1003
+    WATCHER_EXCEPTION = 1004
 
     USER_SCORE = 2000
     USER_JOIN = 2001
