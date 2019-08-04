@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from ..models import EventType, Event
+from sqlalchemy.orm.exc import NoResultFound
+
+from ..models import EventType, Event, User, Nickname
 
 
 class Watcher__Events():
@@ -95,7 +97,7 @@ class Watcher__Events():
         """
         query = self._session.query(User).join(Nickname).\
             filter(Nickname.nick == nickname).\
-            filter(Nickname.gameID == self._model.game.id)
+            filter(Nickname.gameID == self._model.gameID)
 
         try:
             return query.one()
@@ -113,6 +115,9 @@ class Watcher__Events():
 
         if event.time is None:
             event.time = datetime.now()
+
+        if event.game is None and event.gameID is None:
+            event.game = self._model.game
 
         self._session.add(event)
         self._session.commit()
