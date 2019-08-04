@@ -25,7 +25,6 @@ def index_one(game_id):
 
     watchers = Watcher.query.filter(Watcher.game == game).all()
     players = User.query.filter(User.nicknames.any(Nickname.game == game)).all()
-    nicknames = []
     for player in players: # XXX Don't use this
         setattr(player, 'nickname',
                 Nickname.query.\
@@ -33,4 +32,4 @@ def index_one(game_id):
                     .one().nick)
 
     return render_template('game/index_one.html', game=game, watchers=watchers,
-                           players=players, nicknames=nicknames)
+                           players=players)
