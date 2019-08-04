@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import 'admin/layout.html' as layout with context -%}
+
+{% block title %}Admin: {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block secondary_nav %}
+        <div class="navbar navbar-light bg-light navbar-expand pl-2" id="admin-navbar">
+            <ul class="nav navbar-nav">
+                {{ layout.menu() }}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {{ layout.menu_links() }}
+            </ul>
+        </div>
+{% endblock %}
+
+{% block content %}
+    {{ layout.messages() }}
+
+    {% set render_ctx = h.resolve_ctx() %}
+    {% block body %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        var nodes = document.querySelectorAll("#admin-navbar li a");
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].classList.add("nav-link");
+        }
+    </script>
+{% endblock %}

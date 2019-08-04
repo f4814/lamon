@@ -5,13 +5,6 @@
 {% block content %}
     <h1>Watcher: {{ watcher }}</h1>
 
-    <form method="POST" action="{{ url_for('watchers.control', watcher_id=watcher.id) }}">
-        {{ form.csrf_token() }}
-        {{ form.start(class="btn btn-primary") }}
-        {{ form.stop(class="btn btn-primary") }}
-        {{ form.reload(class="btn btn-primary") }}
-    </form>
-
     {% for e in watcher.events %}
     {{ e }}
     <br>
