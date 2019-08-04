@@ -19,7 +19,7 @@
                     </a>
                 </td>
                 <td>{{ nick.nick }}</td>
-                <td>0</td>
+                <td>{{ stats_score(game_id=nick.game.id, user_id=user.id) }}</td>
             </tr>
             {% endfor %}
         </tbody>

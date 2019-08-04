@@ -21,8 +21,8 @@
                             (Scoreboard)
                         </a>
                     </td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td>{{ stats_currently_playing(game_id=game.id) }}</td>
+                    <td>{{ stats_number_of_players(game_id=game.id) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

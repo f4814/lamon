@@ -177,4 +177,8 @@ def create_app(config_file='config.toml'):
     from .watcher.manager import WatcherManager
     watcher_manager = WatcherManager(app, db)
 
+    # Stats
+    from .stats import register_stats
+    register_stats(app)
+
     return app
