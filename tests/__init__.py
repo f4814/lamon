@@ -111,7 +111,7 @@ def watcher_model(session):
     session.add(watcher_model)
     session.commit()
 
-    return watcher_model
+    yield watcher_model
 
 @pytest.fixture
 def fake_watcher(session, watcher_model):

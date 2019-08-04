@@ -48,6 +48,7 @@ class WatcherManager():
         :raises ValueError: When watcher is already running
         :raises TypeError: When threadClass of watcher model is no subclass of
             Watcher
+        :raises KeyError: When a required config-key is missing
         """
         if id is not None:
             model = WatcherModel.query.filter(WatcherModel.id == id).one()

@@ -118,6 +118,8 @@ class Watcher(ABC, Thread, Watcher__Events):
 
     def reload(self):
         """ Reload all config keys (specified in Watcher.config_keys)
+
+        :raises KeyError: If a required configkey is missing
         """
         for key, value in self.config_keys.items():
             query = self._session.query(WatcherConfig).\
@@ -129,6 +131,7 @@ class Watcher(ABC, Thread, Watcher__Events):
             except NoResultFound:
                 if value['required']:
                     self.logger.warning(f'No config w/ key found: {key}')
+                    raise KeyError(f'Watcher has no {key} config-key')
                 else:
                     self.logger.debug(f'Optional key {key} not found')
 

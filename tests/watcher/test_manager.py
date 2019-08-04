@@ -1,15 +1,14 @@
 import pytest
 
-from lamon import db
-
 from sqlalchemy.orm.exc import NoResultFound
 
+from lamon import db
 from . import FakeWatcher
-
-from tests import flask, watcher_model, session
+from tests import flask, watcher_model, session, fake_watcher
 
 @pytest.fixture
-def fake_watcher(watcher_model, flask):
+def watcher_model_(watcher_model, flask):
+    """ Like watcher model. But cleans up after itself """
     yield watcher_model
     try:
         flask.watcher_manager.stop(model=watcher_model)
@@ -19,60 +18,70 @@ def fake_watcher(watcher_model, flask):
 class TestManager():
     """ Test Watcher management """
 
-    def test_is_running(self, fake_watcher, flask):
+    def test_is_running(self, watcher_model_, flask):
         """ Test is_running mechanism """
-        assert not flask.watcher_manager.is_running(id=fake_watcher.id)
-        assert not flask.watcher_manager.is_running(model=fake_watcher)
+        assert not flask.watcher_manager.is_running(id=watcher_model_.id)
+        assert not flask.watcher_manager.is_running(model=watcher_model_)
 
-        flask.watcher_manager.start(model=fake_watcher)
+        flask.watcher_manager.start(model=watcher_model_)
 
-        assert flask.watcher_manager.is_running(id=fake_watcher.id)
-        assert flask.watcher_manager.is_running(model=fake_watcher)
+        assert flask.watcher_manager.is_running(id=watcher_model_.id)
+        assert flask.watcher_manager.is_running(model=watcher_model_)
 
-        flask.watcher_manager.stop(model=fake_watcher)
+        flask.watcher_manager.stop(model=watcher_model_)
 
-        assert not flask.watcher_manager.is_running(id=fake_watcher.id)
-        assert not flask.watcher_manager.is_running(model=fake_watcher)
+        assert not flask.watcher_manager.is_running(id=watcher_model_.id)
+        assert not flask.watcher_manager.is_running(model=watcher_model_)
 
 
 class TestManagerStart():
     """ Test Watcher startup """
 
-    def test_start_id(self, fake_watcher, flask):
+    def test_start_id(self, watcher_model_, flask):
         """ Test regular starting """
-        flask.watcher_manager.start(id=fake_watcher.id)
-        assert flask.watcher_manager.is_running(id=fake_watcher.id)
+        flask.watcher_manager.start(id=watcher_model_.id)
+        assert flask.watcher_manager.is_running(id=watcher_model_.id)
 
-    def test_already_running(self, fake_watcher, flask):
+    def test_already_running(self, watcher_model_, flask):
         """ Test starting already running watcher """
         with pytest.raises(ValueError):
-            flask.watcher_manager.start(id=fake_watcher.id)
-            flask.watcher_manager.start(id=fake_watcher.id)
+            flask.watcher_manager.start(id=watcher_model_.id)
+            flask.watcher_manager.start(id=watcher_model_.id)
 
-    def test_nonexistent(self, fake_watcher, flask):
+    def test_nonexistent(self, watcher_model_, flask):
         """ Test starting a watcher not present in the database """
         with pytest.raises(NoResultFound):
-            flask.watcher_manager.start(id=fake_watcher.id+1)
+            flask.watcher_manager.start(id=watcher_model_.id+1)
 
 
 class TestManagerStop():
     """ Test Watcher shutdown """
 
-    def test_stop(self, fake_watcher, flask):
+    def test_stop(self, watcher_model_, flask):
         """ Test regular stop """
-        flask.watcher_manager.start(id=fake_watcher.id)
-        flask.watcher_manager.stop(id=fake_watcher.id)
-        assert not flask.watcher_manager.is_running(id=fake_watcher.id)
+        flask.watcher_manager.start(id=watcher_model_.id)
+        flask.watcher_manager.stop(id=watcher_model_.id)
+        assert not flask.watcher_manager.is_running(id=watcher_model_.id)
 
-    def test_already_stopped(self, fake_watcher, flask):
+    def test_already_stopped(self, watcher_model_, flask):
         """ Test stopping an not running watcher """
         with pytest.raises(ValueError):
-            flask.watcher_manager.stop(id=fake_watcher.id)
+            flask.watcher_manager.stop(id=watcher_model_.id)
 
-    def test_nonexistent(self, fake_watcher, flask):
+    def test_nonexistent(self, watcher_model_, flask):
         """ Test stopping watcher no present in the database """
         with pytest.raises(NoResultFound):
-            flask.watcher_manager.stop(id=fake_watcher.id+1)
+            flask.watcher_manager.stop(id=watcher_model_.id+1)
 
 class TestManagerReload():
     """ Test Watcher reload """
+
+    def test_missing_keys(self, watcher_model_, flask):
+        # Patch fake watcher
+        flask.watcher_manager.start(model=watcher_model_)
+        flask.watcher_manager._watchers[watcher_model_.id].config_keys = {
+            'missing': {'required': True, 'type': str}
+        }
+
+        with pytest.raises(KeyError):
+            flask.watcher_manager.reload(id=watcher_model_.id)

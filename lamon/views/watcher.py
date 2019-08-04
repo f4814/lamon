@@ -32,7 +32,7 @@ def start(id):
     except ValueError as e:
         flash(str(e), 'warning')
     except KeyError as e:
-        flash(f'Missing config key: {e}', 'error')
+        flash(str(e), 'error')
     return redirect(request.referrer or url_for('watchers.index_one', watcher_id=id))
 
 @watcher_blueprint.route('/<int:id>/stop')

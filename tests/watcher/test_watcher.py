@@ -86,6 +86,11 @@ class TestWatcher():
             if isinstance(t, Watcher):
                 assert t.name != fake_watcher.name
 
+    def test_missing_keys(self, fake_watcher):
+        fake_watcher.config_keys = {'missing': {'required': True, 'type': str}}
+        with pytest.raises(KeyError):
+            fake_watcher.reload()
+
     def test_reload(self, fake_watcher, watcher_model, session):
         """ Test reloading mechanism """
         query = session.query(Event).\
