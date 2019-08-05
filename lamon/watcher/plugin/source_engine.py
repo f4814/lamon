@@ -1,4 +1,6 @@
 from valve.source.a2s import ServerQuerier, NoResponseError
+from socket import gaierror
+from time import sleep
 
 from .. import Watcher, WatcherException
 from lamon.models import EventType
@@ -38,25 +40,22 @@ class SourceEngineWatcher(Watcher):
     def runner(self):
         # Setup valve server querier
         addr = (self.config['address'], self.config['port'])
-        connection_lost = False
         server_info = None
 
         with ServerQuerier(addr, self.config['timeout']) as server:
             while getattr(self, 'shutdown', True):
                 try:
                     server_info = server.info()
-                except NoResponseError:
+                except (NoResponseError, gaierror):
                     self.connection_lost_event()
-                    self.logger.debug("Watcher connection failure")
-                    connection_lost = True
+                    sleep(self.config['timeout'])
                     continue
 
                 if server_info['app_id'] != int(self.config['app_id']):
                     raise WatcherException(f'Wrong app id on server: {server_info["app_id"]}')
                 self._updatePlayers(server.players()['players'])
 
-                if connection_lost:  # Watcher reaquired connection
-                    self.connection_reaquired_event()
+                self.connection_reaquired_event()
 
     def _updatePlayers(self, players):
         for p in players:

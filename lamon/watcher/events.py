@@ -20,12 +20,19 @@ class Watcher__Events():
         self._add_event(Event(type=EventType.WATCHER_STOP))
 
     def connection_lost_event(self):
-        """ Saves a :attr:`~EventType.WATCHER_CONNECTION_LOST` event """
-        self._add_event(Event(type=EventType.WATCHER_CONNECTION_LOST))
+        """ Saves a :attr:`~EventType.WATCHER_CONNECTION_LOST` event.
+        This function only emits one event before
+        :attr:`self.connection_reaquired_event` is called.
+        """
+        if getattr(self, '_connected', True):
+            self._add_event(Event(type=EventType.WATCHER_CONNECTION_LOST))
+            self._connected = False
 
     def connection_reaquired_event(self):
         """ Saves a :attr:`~EventType.WATCHER_CONNECTION_REAQUIRED` event """
-        self._add_event(Event(type=EventType.WATCHER_CONNECTION_REAQUIRED))
+        if not getattr(self, '_connected', False):
+            self._add_event(Event(type=EventType.WATCHER_CONNECTION_REAQUIRED))
+            self._connected = True
 
     def score_event(self, nickname, score):
         """ Save a new score into the database. Emits a

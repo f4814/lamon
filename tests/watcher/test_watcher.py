@@ -124,3 +124,27 @@ class TestWatcherEvents():
 
         assert e.id == res.id
         assert e.time == res.time
+
+    def test_connection_events(self, monkeypatch, fake_watcher, session):
+        # Patch _add_event
+        mock_events = []
+        def mock_add_event(event):
+            mock_events.append(event)
+
+        monkeypatch.setattr(fake_watcher, '_add_event', mock_add_event)
+
+        # Initally calling connection_lost_event
+        fake_watcher.connection_lost_event()
+        assert len(mock_events) == 1
+
+        # Calling again
+        fake_watcher.connection_lost_event()
+        assert len(mock_events) == 1
+
+        # Calling connection aquired
+        fake_watcher.connection_reaquired_event()
+        assert len(mock_events) == 2
+
+        # Calling again
+        fake_watcher.connection_reaquired_event()
+        assert len(mock_events) == 2
