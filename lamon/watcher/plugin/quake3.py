@@ -14,29 +14,25 @@ class Quake3Watcher(Watcher):
                    'timeout': {'type': int, 'required': True},
                    'rcon_password': {'type': str, 'required': True}}
 
+    log_parser = {
+        '.*Kill:.*: (.*) killed (.*) by .*': lambda e: self.die_event(e[1])
+    }
+
     def __init__(self, **kwargs):
         super().__init__(__name__, **kwargs)
 
-        self.packet_prefix = ('\xff' * 4).encode()
-
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.settimeout(self.config['timeout'])
-
         self.connection_lost = False
 
-        # Regexes. Save here so we don't compile them everytime
-        self.user_re = re.compile('\s*(\d*)\s*(\d*)\s*(\d*)\s*([^\x12]*)')
-        self.map_re = re.compile('map: (.*)')
-
     def runner(self):
-        self.sock.connect((self.config['address'], self.config['port']))
+        quake3 = Quake3((self.config['address'], self.config['port']),
+                        self.config['timeout'], self.config['rcon_password'])
 
         while getattr(self, 'shutdown', True):
             try:
-                info = self.get_info()
+                info = quake3.get_info()
             except WatcherException:
-                if not self.connection_lost: # Prevent duplicate events
-                    self.add_event(Event(type=EventType.WATCHER_CONNECTION_LOST))
+                if not self.connection_lost:  # Prevent duplicate events
+                    self.connection_lost_event()
                     self.connection_lost = True
 
                 time.sleep(3)
@@ -44,13 +40,34 @@ class Quake3Watcher(Watcher):
 
             for key, value in info['players'].items():
                 try:
-                    self.add_score(key, value['frags'])
-                except ValueError: pass
+                    self.score_event(self, key, value['frags'])
+                except ValueError:
+                    pass
 
             if self.connection_lost:
-                self.add_event(Event(type=EventType.WATCHER_CONNECTION_REAQUIRED))
+                self.connection_reaquired_event()
                 self.connection_lost = False
             time.sleep(3)
+
+    def _get_event_time(self, gametime):
+        pass
+
+
+class Quake3():
+    """ Implementation of the quake3 protocol """
+
+    def __init__(self, addr, timeout, password):
+        self.packet_prefix = ('\xff' * 4).encode()
+
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.settimeout(timeout)
+        self.sock.connect(addr)
+
+        self.password = password
+
+        # Regexes. Save here so we don't compile them everytime
+        self.user_re = re.compile('\s*(\d*)\s*(\d*)\s*(\d*)\s*([^\x12]*)')
+        self.map_re = re.compile('map: (.*)')
 
     def get_info(self):
         """ Get Server information
@@ -112,9 +129,15 @@ class Quake3Watcher(Watcher):
 
         :raises WatcherException: Bas RCON Password
         """
-        respType, respBody = self.cmd(f'rcon "{self.config["rcon_password"]}" {cmd}')
+        respType, respBody = self.cmd(
+            f'rcon "{self.password}" {cmd}')
 
         if respBody == 'Bad rconpassword.\n':
             raise WatcherException("Bad RCON Password")
+        elif respBody == 'No rconpassword set on the server.\n':
+            raise WatcherException("No RCON Password set on the server")
 
         return respType, respBody
+
+    def __del__(self):
+        self.sock.close()

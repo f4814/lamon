@@ -1,10 +1,9 @@
-:tocdepth: 2
-
 Introduction
-############
+============
 
 Installation
-============
+------------
+
 The easiest way to install lamon is via pip:
 
 .. code-block:: bash
@@ -13,7 +12,8 @@ The easiest way to install lamon is via pip:
 
 
 Getting Started
-===============
+---------------
+
 In order to use lamon, you have to create a configuration file. To use the
 default one just copy `config.toml.example` to `config.toml` and start
 lamon in the same directory. This will create a sqlite3 database named `lamon.db`.
@@ -25,7 +25,8 @@ Lamon provides a simple cli wrapper, which should be sufficient in most cases.
     lamon --host 127.0.0.1 --port 5000 --config config.toml
 
 Configuration
-=============
+-------------
+
 The configuration file (``./config.toml``) defines uses four seperate blocks:
 
 .. code-block:: ini
@@ -120,12 +121,13 @@ unneccessary:
 
 
 Concepts
-========
+--------
 
-**Games**
+Games
+~~~~~
 
-**Managers**
-
+Managers
+~~~~~~~~
 
 Managing Watchers
-=================
+-----------------
