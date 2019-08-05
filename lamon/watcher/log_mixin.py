@@ -20,13 +20,13 @@ class LogMixin():
         }
     """
 
-    def __init__(self):
-        self.logger.debug('Compiling regular expressions')
-        for expr, attrs in self.log_parser.items():
-            self._compiled[re.compile(expr)] = attrs
-
     def parse(self, msg):
-        for expr, call in self._compiled.items():
+        for expr, call in self.log_parser.items():
+            if type(expr) is str:
+                comp = re.compile(expr)
+                self.log_parser[comp] = self.log_parser.pop(expr)
+                expr = comp
+
             match = re.match(expr, msg)
 
             if match is None:
