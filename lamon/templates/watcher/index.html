@@ -22,8 +22,8 @@
                         </a>
                     </td>
                     <td>{{ watcher.info }}</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td>{{ stats_currently_playing(watcher_id=watcher.id) }}</td>
+                    <td>{{ stats_number_of_players(watcher_id=watcher.id) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

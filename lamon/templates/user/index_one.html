@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
 {% block content %}
     <h1> {{ user.username }}'s Profile:</h1>
+
+    <div id="score-plot"></div>
+
     <table class="table">
         <thead>
             <tr>
@@ -19,9 +24,51 @@
                     </a>
                 </td>
                 <td>{{ nick.nick }}</td>
-                <td>0</td>
+                <td>{{ stats_score(game_id=nick.game.id, user_id=user.id) }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </thead>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+    <script>
+        var data = [];
+        var plot = {};
+
+        {% for nick in nicknames %}
+            plot = {
+                {% set s = stats_score(game_id=nick.game.id, user_id=user.id, timeline=True) %}
+                {% set x = s[0] %}
+                {% set y = s[1] %}
+                type: "scatter",
+                mode: "lines",
+                name: "{{ nick.game.name }}",
+                x: {{ x|tojson }},
+                y: {{ y|tojson }}
+            }
+
+            data.push(plot);
+        {% endfor %}
+
+        plot = {
+            {% set s = stats_score(user_id=user.id, timeline=True) %}
+            {% set x = s[0] %}
+            {% set y = s[1] %}
+            type: "scatter",
+            mode: "lines",
+            name: "complete",
+            x: {{ x|tojson }},
+            y: {{ y|tojson }}
+        }
+
+        data.push(plot);
+
+        var layout = {
+            title: "{{ user.username }}'s Scores"
+        };
+
+        Plotly.newPlot('score-plot', data, layout);
+    </script>
 {% endblock %}

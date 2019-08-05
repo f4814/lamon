@@ -64,8 +64,8 @@ class WatcherView(AuthModelView):
                  'Quake3 Watcher'),
                 ('lamon.watcher.plugin.minecraft.MinecraftWatcher',
                  'Minecraft Watcher'),
-                ('tests.test_watcher.fake.FakeWatcher',
-                 'Fake Watcher')
+                ('tests.watcher.ValueWatcher',
+                 'Fake Value Watcher')
             ]
         }
     }

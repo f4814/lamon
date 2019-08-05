@@ -4,6 +4,10 @@
 
 {% block content %}
     <h1>Game: {{ game.name }}</h1>
+
+    <p>Currently playing: {{ stats_currently_playing(game_id=game.id) }}</p>
+    <p>Number of Players: {{ stats_number_of_players(game_id=game.id) }}</p>
+
     <h2>Watchers</h2>
         <table class="table">
             <thead>
@@ -21,12 +25,17 @@
                                 {{ watcher.game.name }} watcher
                             </a>
                         </td>
-                        <td>0</td>
-                        <td>0</td>
+                        <td>
+                            {{ stats_currently_playing(game_id=game.id, watcher_id=watcher.id) }}
+                        </td>
+                        <td>
+                            {{ stats_number_of_players(game_id=game.id, watcher_id=watcher.id) }}
+                        </td>
                     </tr>
                 {% endfor%}
             </tbody>
         </table>
+
     <h2>Players</h2>
         <table class="table">
             <thead>
@@ -45,7 +54,7 @@
                             </a>
                         </td>
                         <td>{{ player.nickname }}</td>
-                        <td>0</td>
+                        <td>{{ stats_score(game_id=game.id, user_id=player.id) }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
