@@ -1,8 +1,10 @@
 from valve.source.a2s import ServerQuerier, NoResponseError
 from socket import gaierror
 from time import sleep
+from datetime import datetime
 
 from .. import Watcher, WatcherException
+from ..log_mixin import LogMixin
 from lamon.models import EventType
 
 
@@ -22,17 +24,6 @@ class SourceEngineWatcher(Watcher):
                                to be used instead of 232250 which is the ID of
                                the server software."""}}
 
-    log_parser = {
-        'User (\c*) scored: (\c*)': {
-            'event': EventType.USER_SCORE,
-            'groups': {
-                0: {
-                },
-                1: {
-                }
-            }
-        }
-    }
 
     def __init__(self, **kwargs):
         super().__init__(__name__, **kwargs)
@@ -63,3 +54,31 @@ class SourceEngineWatcher(Watcher):
                 continue
 
             self.score_event(p['name'], p['score'])
+
+
+class TTTWatcher(SourceEngineWatcher, LogMixin):
+    """ Like a SourceEngineWatcher. But is able to parse TTT logfiles """
+    log_header_short = '^L (\d\d\/\d\d\/\d{4} - \d\d:\d\d:\d\d): '
+    log_header_long = log_header_short + '\d\d:\d\d.\d\d - '
+
+    log_kill_message = log_header_long + 'KILL:\s*(.*) \[.*\] killed (.*) \[.*\]$'
+    log_join_message = log_header_short + '"(.*)<\d*><STEAM_.*><>" entered the game'
+    log_leave_message = log_header_short + '"(.*)<\d*><STEAM_.*><>" disconnected \(reason "(.*)"\)'
+    def __init__(self, *args, **kwargs):
+        self.log_parser = {
+            self.log_kill_message: lambda e: self._log_message(e, EventType.USER_DIE),
+            self.log_join_message: lambda e: self._log_message(e, EventType.USER_JOIN),
+            self.log_leave_message: lambda e: self._log_message(e, EventType.USER_LEAVE)
+        }
+
+        super().__init__(*args, **kwargs)
+
+    def _log_message(self, expr, type):
+        time = datetime.strptime(expr[1], '%m/%d/%Y - %H:%M:%S')
+
+        if type is EventType.USER_DIE:
+            self.die_event(expr[3], time=time, info=expr[2])
+        elif type is EventType.USER_JOIN:
+            self.join_event(expr[2], time=time)
+        elif type is EventType.USER_LEAVE:
+            self.leave_event(expr[2], time=time, info=expr[3])
